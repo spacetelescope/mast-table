@@ -1,9 +1,9 @@
 [project]
 name = "mast-aladin-lite"
-description = "placeholder"
+description = "Visualize MAST data products in Aladin Lite"
 requires-python = ">=3.10"
 authors = [
-    { name = "placeholder", email = "placeholder@stsci.edu" },
+    { name = "mast-aladin-lite developers", email = "help@stsci.edu" },
 ]
 dependencies = [
     "ipyaladin",
