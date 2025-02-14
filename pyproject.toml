@@ -1,0 +1,28 @@
+[project]
+name = "mast-aladin-lite"
+description = "placeholder"
+requires-python = ">=3.#"
+authors = [
+    { name = "placeholder", email = "placeholder@stsci.edu" },
+]
+dependencies = [
+    "ipyaladin",
+    "astropy",
+    "astroquery",
+    "sidecar",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.license]
+file = "LICENSE"
+content-type = "text/plain"
+
+[build-system]
+requires = [
+    "setuptools",
+    "setuptools_scm"
+]
+build-backend = "setuptools.build_meta"
