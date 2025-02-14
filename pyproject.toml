@@ -1,20 +1,22 @@
 [project]
 name = "mast-aladin-lite"
 description = "placeholder"
-requires-python = ">=3.#"
+requires-python = ">=3.10"
 authors = [
     { name = "placeholder", email = "placeholder@stsci.edu" },
 ]
 dependencies = [
     "ipyaladin",
-    "astropy",
     "astroquery",
     "sidecar",
 ]
 
+[project.urls]
+Homepage = "https://mast-aladin-lite.readthedocs.io/en/latest/"
+
 [project.readme]
-file = "README.md"
-content-type = "text/markdown"
+file = "README.rst"
+content-type = "text/x-rst"
 
 [project.license]
 file = "LICENSE"
