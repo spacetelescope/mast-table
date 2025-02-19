@@ -23,6 +23,9 @@ content-type = "text/x-rst"
 file = "LICENSE"
 content-type = "text/plain"
 
+[tool.setuptools.packages.find]
+include = ["mast_aladin_lite"]
+
 [build-system]
 requires = [
     "setuptools",
