@@ -1,5 +1,6 @@
 [project]
 name = "mast-aladin-lite"
+version = "0.0.1"
 description = "Visualize MAST data products in Aladin Lite"
 requires-python = ">=3.10"
 authors = [
