@@ -1,6 +1,5 @@
 [project]
 name = "mast-aladin-lite"
-version = "0.0.1"
 description = "Visualize MAST data products in Aladin Lite"
 requires-python = ">=3.10"
 authors = [
@@ -10,6 +9,15 @@ dependencies = [
     "ipyaladin",
     "astroquery",
     "sidecar",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+docs = [
+    "sphinx-astropy[confv2]>=1.9.1",
+    "sphinx_design"
 ]
 
 [project.urls]
