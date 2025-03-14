@@ -1,3 +1,6 @@
+.. image:: https://codecov.io/gh/spacetelescope/mast-aladin-lite/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/spacetelescope/mast-aladin-lite
+
 # mast-aladin-lite
 
 While we are experimenting with Aladin Lite integration in MAST platforms, this repository can be used to contain:
