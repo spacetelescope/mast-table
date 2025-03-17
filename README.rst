@@ -3,7 +3,7 @@
 
 # mast-aladin-lite
 
-While we are experimenting with Aladin Lite integration in MAST platforms, this repository can be used to contain:
+While we experiment with Aladin Lite integration in MAST platforms, this repository can be used to contain:
 - documentation
 - support code for wrapping and integrating Aladin Lite
 - demonstration notebooks
