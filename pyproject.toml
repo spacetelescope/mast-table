@@ -14,6 +14,7 @@ dependencies = [
     "ipyvuetify",
     "ipywidgets",
     "solara",
+    "jdaviz"
 ]
 dynamic = [
     "version",
