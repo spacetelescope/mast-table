@@ -9,6 +9,7 @@ dependencies = [
     "ipyaladin",
     "astroquery",
     "sidecar",
+    "jdaviz",
 ]
 dynamic = [
     "version",
