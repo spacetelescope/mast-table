@@ -9,6 +9,10 @@ dependencies = [
     "ipyaladin",
     "astroquery",
     "sidecar",
+    "traitlets",
+    "ipypopout",
+    "ipyvuetify",
+    "ipywidgets",
 ]
 dynamic = [
     "version",
@@ -36,6 +40,9 @@ content-type = "text/plain"
 
 [tool.setuptools.packages.find]
 include = ["mast_aladin_lite"]
+
+[tool.setuptools.package-data]
+mast_aladin_lite = ["table/data/*.json"]
 
 [build-system]
 requires = [
