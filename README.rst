@@ -48,7 +48,7 @@ Or, you can install the latest development version of ``mast-aladin-lite`` using
 
    pip install git+https://github.com/spacetelescope/mast-aladin-lite --upgrade
 
-For details on installing and using Jdaviz, see the
+For details on installing and using mast-aladin-lite, see the
 `mast-aladin-lite Installation <https://mast-aladin-lite.readthedocs.io/en/latest/installation.html>`_.
 
 Help
