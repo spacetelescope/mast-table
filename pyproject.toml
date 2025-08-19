@@ -9,12 +9,12 @@ dependencies = [
     "ipyaladin @ git+https://github.com/cpparts/ipyaladin.git@dev_cobalt",
     "astroquery",
     "sidecar",
+    "jdaviz",
     "traitlets",
     "ipypopout",
     "ipyvuetify",
     "ipywidgets",
     "solara",
-    "jdaviz"
 ]
 dynamic = [
     "version",
