@@ -1,0 +1,33 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: ArchiveFileID, datatype: int64}
+# - {name: fileSetName, datatype: string}
+# - {name: productLevel, datatype: string}
+# - {name: targprop, datatype: string}
+# - {name: targ_ra, datatype: float64}
+# - {name: targ_dec, datatype: float64}
+# - {name: instrume, datatype: string}
+# - {name: exp_type, datatype: string}
+# - {name: opticalElements, datatype: string}
+# - {name: date_obs, datatype: string}
+# - {name: duration, datatype: float64}
+# - {name: program, datatype: int64}
+# - {name: observtn, datatype: int64}
+# - {name: visit, datatype: int64}
+# - {name: publicReleaseDate, datatype: string}
+# - {name: pi_name, datatype: string}
+# - {name: proposal_type, datatype: string}
+# - {name: proposal_cycle, datatype: int64}
+# - {name: targtype, datatype: string}
+# - {name: access, datatype: string}
+# - {name: cal_ver, datatype: string}
+# - {name: ang_sep, datatype: float64}
+# - {name: s_region, datatype: string}
+# schema: astropy-2.0
+ArchiveFileID fileSetName productLevel targprop targ_ra targ_dec instrume exp_type opticalElements date_obs duration program observtn visit publicReleaseDate pi_name proposal_type proposal_cycle targtype access cal_ver ang_sep s_region
+184925621 jw01979002001_02101_00001 "1b, 2a, 2b, 2c" M-4 245.9301782243485 -26.45004099208315 NIRCAM NRC_IMAGE "F150W2;CLEAR, F322W2;CLEAR" 2023-04-09T20:36:40.8640000 515.365 1979 2 1 2026-06-13T22:07:22 "Bedin, Luigi R." GO 1 FIXED EXCLUSIVE_ACCESS 1.18.0 1.9285915905156554 "POLYGON ICRS  245.959199687 -26.421462986 245.921398055 -26.409589788 245.907787180 -26.442832315 245.945550102 -26.455602014"
+184925593 jw01979002001_02101_00003 "1b, 2a, 2b, 2c" M-4 245.9301782241785 -26.45004099231466 NIRCAM NRC_IMAGE "F150W2;CLEAR, F322W2;CLEAR" 2023-04-09T20:59:45.8860000 515.365 1979 2 1 2026-06-13T22:07:21 "Bedin, Luigi R." GO 1 FIXED EXCLUSIVE_ACCESS 1.18.0 1.925924661804068 "POLYGON ICRS  245.939921182 -26.435080550 245.921459310 -26.429109475 245.914688873 -26.445503549 245.933179718 -26.451686653"
+184925735 jw01979002001_02101_00004 "1b, 2a, 2b, 2c" M-4 245.9301782241047 -26.45004099241517 NIRCAM NRC_IMAGE "F150W2;CLEAR, F322W2;CLEAR" 2023-04-09T21:09:47.1660000 515.365 1979 2 1 2026-06-13T22:07:53 "Bedin, Luigi R." GO 1 FIXED EXCLUSIVE_ACCESS 1.18.0 1.947287702735809 "POLYGON ICRS  245.939840356 -26.434674939 245.921378527 -26.428703918 245.914608175 -26.445098012 245.933098978 -26.451281062"
+184925825 jw01979003001_02101_00001 "1b, 2a, 2b, 2c" M-4-shift 245.9083032218765 -26.50142988433757 NIRCAM NRC_IMAGE "F150W2;CLEAR, F322W2;CLEAR" 2023-04-10T02:15:28.4240000 128.841 1979 3 1 2026-06-13T22:12:16 "Bedin, Luigi R." GO 1 FIXED EXCLUSIVE_ACCESS 1.18.0 0.0 "POLYGON ICRS  245.925168843 -26.512866127 245.906258830 -26.506929958 245.899561604 -26.523543382 245.918280954 -26.529682361"
+184925615 jw01979003001_02101_00002 "1b, 2a, 2b, 2c" M-4-shift 245.9083032218502 -26.50142988437347 NIRCAM NRC_IMAGE "F150W2;CLEAR, F322W2;CLEAR" 2023-04-10T02:19:03.2080000 128.841 1979 3 1 2026-06-13T22:07:53 "Bedin, Luigi R." GO 1 FIXED EXCLUSIVE_ACCESS 1.18.0 0.0 "POLYGON ICRS  245.924415848 -26.461091806 245.905962809 -26.455224787 245.899360402 -26.471590089 245.917786980 -26.477649446"

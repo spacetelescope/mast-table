@@ -1,9 +1,9 @@
 [project]
-name = "mast-aladin-lite"
+name = "mast-aladin"
 description = "Visualize MAST data products in Aladin Lite"
 requires-python = ">=3.11"
 authors = [
-    { name = "mast-aladin-lite developers", email = "help@stsci.edu" },
+    { name = "mast-aladin developers", email = "help@stsci.edu" },
 ]
 dependencies = [
     "ipyaladin @ git+https://github.com/cpparts/ipyaladin.git@dev_cobalt",
@@ -30,7 +30,7 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://mast-aladin-lite.readthedocs.io/en/latest/"
+Homepage = "https://mast-aladin.readthedocs.io/en/latest/"
 
 [project.readme]
 file = "README.rst"
@@ -41,10 +41,10 @@ file = "LICENSE"
 content-type = "text/plain"
 
 [tool.setuptools.packages.find]
-include = ["mast_aladin_lite"]
+include = ["mast_aladin"]
 
 [tool.setuptools.package-data]
-mast_aladin_lite = ["table/data/*.json"]
+mast_aladin = ["table/data/*.json"]
 
 [build-system]
 requires = [
