@@ -62,4 +62,4 @@ License & Attribution
 This project is Copyright (c) Space Telescope Science Institute and licensed under
 the terms of the BSD 3-Clause license. See the
 `licenses <https://github.com/spacetelescope/mast-aladin/tree/main/licenses>`_
-folder for more information on works the mast-aladin-list package is derived from or distributes.
+folder for more information on works the mast-aladin package is derived from or distributes.
