@@ -1,5 +1,5 @@
-.. image:: https://github.com/spacetelescope/mast-aladin/workflows/CI/badge.svg
-    :target: https://github.com/spacetelescope/mast-aladin/actions
+.. image:: https://github.com/spacetelescope/mast-aladin/actions/workflows/ci_workflows.yml/badge.svg
+    :target: https://github.com/spacetelescope/mast-aladin/actions/workflows/ci_workflows.yml
     :alt: GitHub Actions CI Status
 
 .. image:: https://codecov.io/gh/spacetelescope/mast-aladin/branch/main/graph/badge.svg
