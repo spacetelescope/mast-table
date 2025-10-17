@@ -1,21 +1,16 @@
 [project]
-name = "mast-aladin"
-description = "Visualize MAST data products in Aladin Lite"
+name = "mast-table"
+description = "Interact with MAST data products in a table"
 requires-python = ">=3.11"
 authors = [
-    { name = "mast-aladin developers" },
+    { name = "mast-table developers" },
 ]
 dependencies = [
-    "ipyaladin @ git+https://github.com/cpparts/ipyaladin.git@dev_cobalt",
     "astroquery",
-    "sidecar",
-    "jdaviz",
     "traitlets",
     "ipypopout",
     "ipyvuetify",
     "ipywidgets",
-    "solara",
-    "roman-datamodels",
 ]
 dynamic = [
     "version",
@@ -30,9 +25,6 @@ docs = [
     "sphinx_design"
 ]
 
-[project.urls]
-Homepage = "https://mast-aladin.readthedocs.io/en/latest/"
-
 [project.readme]
 file = "README.rst"
 content-type = "text/x-rst"
@@ -42,7 +34,7 @@ file = "LICENSE"
 content-type = "text/plain"
 
 [tool.setuptools.packages.find]
-include = ["mast_aladin"]
+include = ["mast_table"]
 
 [tool.setuptools.package-data]
 mast_aladin = ["table/data/*.json"]
