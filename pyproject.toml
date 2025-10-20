@@ -37,7 +37,7 @@ content-type = "text/plain"
 include = ["mast_table"]
 
 [tool.setuptools.package-data]
-mast_aladin = ["table/data/*.json"]
+mast_table= ["mast_table/data/*.json"]
 
 [build-system]
 requires = [

@@ -44,7 +44,7 @@ jobs:
         cd ..
         python -m venv testenv
         testenv/bin/pip install pytest pytest-astropy pytest-tornasync mast-table/dist/*.whl
-        testenv/bin/pytest -p no:warnings mast-table/tests
+        testenv/bin/pytest -p no:warnings mast-table/mast_table/tests
 
     # NOTE: Do not run this part for PR testing.
     - name: Publish distribution 📦 to PyPI

@@ -1,4 +1,4 @@
-from table import MastTable
+from mast_table import MastTable
 
 
 def test_mast_table_init(mast_observation_table):
