@@ -12,7 +12,7 @@ import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
-from table import validate
+from mast_table import validate
 from astroquery.mast import MastMissions
 
 __all__ = [
