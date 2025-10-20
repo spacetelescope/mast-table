@@ -1,3 +1,6 @@
+.. image:: https://codecov.io/gh/spacetelescope/mast-table/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/spacetelescope/mast-table
+
 mast-table
 ===========
 
