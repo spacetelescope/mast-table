@@ -15,6 +15,6 @@ def mast_observation_table():
         result.write("mm_jwst_M4.ecsv")
     """
     path = os.path.join(
-        os.path.dirname(__file__), "mast_table", "tests", "data", "mm_jwst_M4.ecsv"
+        os.path.dirname(__file__), "tests", "data", "mm_jwst_M4.ecsv"
     )
     return Table.read(path)
