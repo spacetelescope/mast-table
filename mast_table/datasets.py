@@ -4,7 +4,7 @@ from mast_table import MastTable
 from mast_table.products import Products
 
 
-class Filesets(MastTable):
+class Datasets(MastTable):
     def send_footprints_to(self, *apps):
         if len(apps) == 1 and isinstance(apps[0], (tuple, list)):
             apps = apps[0]
