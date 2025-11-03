@@ -1,5 +1,3 @@
-
-import os
 import warnings
 
 from traitlets import List, Unicode, Bool, Int, Any, observe
@@ -13,7 +11,6 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from mast_table import validate
-from astroquery.mast import MastMissions
 
 __all__ = [
     'MastTable',
@@ -202,62 +199,9 @@ class MastTable(VuetifyTemplate):
         """
         return Table(self.selected_rows)
 
-    def vue_open_selected_rows_in_jdaviz(self, *args):
-        from jdaviz import Imviz
-        from jdaviz.configs.imviz.helper import _current_app as viz
-
-        if viz is None:
-            viz = Imviz()
-
-        with viz.batch_load():
-            for filename in self.selected_rows_table['filename']:
-                _download_from_mast(filename)
-                viz.load_data(filename)
-
-        orientation = viz.plugins['Orientation']
-        orientation.align_by = 'WCS'
-        orientation.set_north_up_east_left()
-
-        plot_options = viz.plugins['Plot Options']
-        if len(plot_options.layer.choices) > 1:
-            for layer in plot_options.layer.choices:
-                plot_options.layer = layer
-                plot_options.image_color_mode = 'Color'
-
-            plot_options.apply_RGB_presets()
-
-        return viz
-
-    def vue_open_selected_rows_in_aladin(self, *args):
-        from mast_aladin.app import gca
-
-        mal = gca()
-
-        for filename in self.selected_rows_table['filename']:
-            _download_from_mast(filename)
-            mal.delayed_add_fits(filename)
-
-        return mal
-
     @observe('mission')
     def _on_mission_update(self, msg={}):
         self.enable_load_in_app = msg['new'] == 'list_products'
-
-
-def _download_from_mast(product_file_name):
-    if os.path.exists(product_file_name):
-        # support load from cache without query to MM
-        return
-
-    # temporarily support JWST and HST until Roman is also available:
-    if product_file_name.startswith('jw'):
-        mission = 'jwst'
-    elif product_file_name.startswith('r'):
-        mission = 'roman'
-    else:
-        mission = 'hst'
-
-    MastMissions(mission=mission).download_file(product_file_name)
 
 
 def get_current_table():
