@@ -13,12 +13,14 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from mast_table import validate
-from astroquery.mast import MastMissions
+from astroquery.mast.missions import MastMissions
 
 __all__ = [
     'MastTable',
     'get_current_table',
 ]
+
+col_unique_row_index = '_unique_row_index'
 
 # register loaded table widgets as they're initialized
 _table_widgets = dict()
@@ -106,8 +108,8 @@ class MastTable(VuetifyTemplate):
 
         super().__init__(**kwargs)
         self.popout_button = PopoutButton(self)
-
         self.table = table
+        self.table[col_unique_row_index] = np.arange(len(table))
         self.app = app
 
         self.items = serialize(table)
@@ -115,16 +117,25 @@ class MastTable(VuetifyTemplate):
         columns = table.colnames
         self.column_descriptions = validate.get_column_descriptions(self.mission)
 
-        self._set_item_key(columns, unique_column)
+        if item_key := kwargs.get('item_key', None):
+            self.item_key = item_key
+        else:
+            self._set_item_key(columns, unique_column)
 
-        self.headers_avail = list(columns)
+        available_columns = [
+            column for column in columns if column != col_unique_row_index
+        ]
+        self.headers_avail = available_columns
 
         # by default, remove the `s_region`` column
         # from the visible columns in the widget:
         if 's_region' in columns:
             columns.remove('s_region')
 
-        self.headers_visible = columns
+        self.headers_visible = [
+            column for column in self.headers_avail
+            if column != 's_region'
+        ]
 
         _table_widgets[len(_table_widgets)] = self
 
@@ -207,9 +218,9 @@ class MastTable(VuetifyTemplate):
         return Table(self.selected_rows)
 
     def vue_open_selected_rows_in_jdaviz(self, *args):
-        import jdaviz
+        import jdaviz as jd
 
-        viz = jdaviz.gca()
+        viz = jd.gca()
 
         with viz.batch_load():
             for filename in self.selected_rows_table['filename']:
