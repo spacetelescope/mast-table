@@ -13,7 +13,7 @@ from astropy.coordinates import SkyCoord
 from astropy.table import Table
 
 from mast_table import validate
-from astroquery.mast.missions import MastMissions
+from astroquery.mast import MastMissions
 
 __all__ = [
     'MastTable',
@@ -122,10 +122,9 @@ class MastTable(VuetifyTemplate):
         else:
             self._set_item_key(columns, unique_column)
 
-        available_columns = [
+        self.headers_avail =  = [
             column for column in columns if column != col_unique_row_index
         ]
-        self.headers_avail = available_columns
 
         # by default, remove the `s_region`` column
         # from the visible columns in the widget:
