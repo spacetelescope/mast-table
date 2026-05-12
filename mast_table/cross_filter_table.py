@@ -78,8 +78,6 @@ def CrossFilterSelect(
     - `classes`: Additional CSS classes to add to the main widget.
 
     """
-    # import pandas as pd
-
     filter, set_filter = solara.use_cross_filter(id(table), "filter-dropdown")
     filter_values, set_filter_values = solara.use_state([])
     column, set_column = solara.use_state_or_update(column)
