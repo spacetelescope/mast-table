@@ -331,6 +331,7 @@ def CrossFilterSlider(
                     on_value=set_filter_value,
                     disabled=not enable,
                     thumb_label='always',
+                    tick_labels='end_points'
                 )
                 if filter_value is not None:
                     solara.Text(f"{filter_value:,}")
@@ -342,6 +343,7 @@ def CrossFilterSlider(
                     on_value=set_filter_value,
                     disabled=not enable,
                     thumb_label='always',
+                    tick_labels='end_points'
                 )
                 if filter_value is not None:
                     solara.Text(f"{filter_value:,}")
