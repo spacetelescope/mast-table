@@ -122,7 +122,7 @@ class MastTable(VuetifyTemplate):
         else:
             self._set_item_key(columns, unique_column)
 
-        self.headers_avail =  = [
+        self.headers_avail = [
             column for column in columns if column != col_unique_row_index
         ]
 
