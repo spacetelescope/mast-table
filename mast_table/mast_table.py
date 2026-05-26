@@ -84,7 +84,7 @@ def _json_safe(value):
     if hasattr(value, 'tolist'):
         try:
             return value.tolist()
-        except Exception:
+        except (TypeError, ValueError):
             pass
     return value
 
