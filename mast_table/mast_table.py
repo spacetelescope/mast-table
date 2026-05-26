@@ -213,7 +213,7 @@ class MastTable(VuetifyTemplate):
             and a warning will be raised..
         """
 
-        # initialize the row cache, so the ``table_options`` observer is safe to fire 
+        # initialize the row cache, so the ``table_options`` observer is safe to fire
         # if that traitlet is passed in via ``kwargs``.
         self._all_items = []
 
