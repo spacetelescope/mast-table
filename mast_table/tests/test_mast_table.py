@@ -75,12 +75,12 @@ def test_serialize_respects_column_format():
     assert rows2[0]['x'] == ''
     assert rows2[1]['x'] == '1.000'
 
-    # Quantity columns retain their unit and respect the format spec
+    # Quantity columns respect the format spec (units appear in header, not cells)
     t3 = Table({'wave': [500.123, 600.456] * u.nm})
     t3['wave'].info.format = '.1f'
     rows3 = serialize(t3)
-    assert rows3[0]['wave'] == '500.1 nm'
-    assert rows3[1]['wave'] == '600.5 nm'
+    assert rows3[0]['wave'] == '500.1'
+    assert rows3[1]['wave'] == '600.5'
 
 
 def test_column_format_propagates_to_widget(mast_observation_table):
