@@ -1,5 +1,6 @@
 
 import os
+import re
 import warnings
 
 from traitlets import List, Unicode, Bool, Int, Dict, Any, observe
@@ -98,44 +99,33 @@ def serialize(table):
         table['flux'].info.format = '.3e'
         table['ra'].info.format = '%.5f'
     """
-    formats = {
-        name: getattr(table[name].info, 'format', None) for name in table.colnames
-    }
-    units = {
-        name: getattr(table[name], 'unit', None) for name in table.colnames
-    }
-    rows = []
-    for row in table:
-        out = {}
-        for name in table.colnames:
-            value = row[name]
-            fmt = formats[name]
-            unit = units[name]
-            if fmt is not None:
-                # preserve the unit if any, format the numeric magnitude
-                if isinstance(value, u.Quantity):
-                    if value.isscalar and np.isnan(value.value):
-                        out[name] = ''
-                        continue
-                    formatted = _format_value(value.value, fmt)
-                    out[name] = f"{formatted} {value.unit.to_string()}"
-                    continue
-                value = _json_safe(value)
-                if isinstance(value, str) and value == '':
-                    out[name] = ''
-                    continue
-                value = _format_value(value, fmt)
-                if unit is not None:
-                    value = f"{value} {unit.to_string()}"
-            else:
-                value = _json_safe(value)
-                if (unit is not None
-                        and not isinstance(value, str)
-                        and not isinstance(value, (list, dict))):
-                    value = f"{value} {unit.to_string()}"
-            out[name] = value
-        rows.append(out)
-    return rows
+    column_names = table.colnames
+    column_units = [table[col].unit for col in table.colnames]
+
+    def _replace_nan(value):
+        if 'nan' in value:
+            value = ''
+        return value
+
+    def nan_to_empty_str(column):
+        nans_found = re.findall('nan', ''.join(column))
+        if len(nans_found):
+            column = [_replace_nan(row) for row in column]
+        return column
+
+    formatted_rows = list(zip(*[
+        nan_to_empty_str(
+            table[col].pformat(show_name=False, show_unit=False)
+        )
+        for col in column_names
+    ]))
+
+    serialized = [
+        {name: f"{val}" + (f" {unit.to_string()}" if hasattr(unit, 'to_string') else '')
+         for name, val, unit in zip(column_names, row, column_units)}
+        for row in formatted_rows
+    ]
+    return serialized
 
 
 known_unique_mast_table_cols = [
