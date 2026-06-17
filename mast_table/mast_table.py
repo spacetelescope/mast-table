@@ -100,7 +100,6 @@ def serialize(table):
         table['ra'].info.format = '%.5f'
     """
     column_names = table.colnames
-    column_units = [table[col].unit for col in table.colnames]
 
     def _replace_nan(value):
         if 'nan' in value:
@@ -121,8 +120,7 @@ def serialize(table):
     ]))
 
     serialized = [
-        {name: f"{val}" + (f" {unit.to_string()}" if hasattr(unit, 'to_string') else '')
-         for name, val, unit in zip(column_names, row, column_units)}
+        {name: f"{val}" for name, val in zip(column_names, row)}
         for row in formatted_rows
     ]
     return serialized
