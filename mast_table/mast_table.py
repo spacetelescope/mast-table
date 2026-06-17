@@ -72,15 +72,13 @@ def _json_safe(value):
         if value.isscalar:
             return f"{value.value} {value.unit.to_string()}"
         return {"value": value.value.tolist(), "unit": str(value.unit)}
-    if isinstance(value, (np.float32, np.float64)):
+    if isinstance(value, np.floating):
         v = float(value)
         return '' if np.isnan(v) else v
     if isinstance(value, float) and np.isnan(value):
         return ''
     if isinstance(value, np.bool_):
         return bool(value)
-    if isinstance(value, np.ndarray):
-        return value.tolist()
     if hasattr(value, 'tolist'):
         try:
             return value.tolist()
