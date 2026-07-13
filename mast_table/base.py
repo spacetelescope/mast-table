@@ -157,7 +157,7 @@ class MastTable(VuetifyTemplate):
     clear_btn_lbl = Unicode('Clear Table').tag(sync=True)
     popout_button = Any().tag(sync=True, **widget_serialization)
     enable_load_in_app = Bool(False).tag(sync=True)
-    mission = Unicode().tag(sync=True)
+    mission = Unicode(allow_none=True).tag(sync=True)
     filter_tray_open = Bool(True).tag(sync=True)
 
     # Server-side pagination traitlets
@@ -172,7 +172,13 @@ class MastTable(VuetifyTemplate):
     table = None
     row_select_callbacks = []
 
-    def __init__(self, table, app=None, update_viewport=True, unique_column=None, **kwargs):
+    def __init__(
+            self,
+            table,
+            app=None,
+            update_viewport=True,
+            unique_column=None,
+            **kwargs):
         """
         Parameters
         ----------
@@ -204,6 +210,7 @@ class MastTable(VuetifyTemplate):
         self._all_items = []
 
         super().__init__(**kwargs)
+
         self.popout_button = PopoutButton(self)
         self.table = table
         self.table[col_unique_row_index] = np.arange(len(table))
@@ -215,23 +222,25 @@ class MastTable(VuetifyTemplate):
         self._all_items = serialize(table)
         self.server_items_length = len(self._all_items)
         self._push_current_page()
-        self.mission = validate.detect_mission_or_products(table)
         columns = table.colnames
-        self.column_descriptions = validate.get_column_descriptions(self.mission)
 
-        if item_key := kwargs.get('item_key', None):
-            self.item_key = item_key
-        else:
+        self.mission = validate.detect_mission_or_products(table)
+
+        if self.mission:
+            self.column_descriptions = validate.get_column_descriptions(self.mission)
+
+        if unique_column:
             self._set_item_key(columns, unique_column)
 
         self.headers_avail = [
             column for column in columns if column != col_unique_row_index
         ]
 
-        # by default, remove the `s_region`` column
-        # from the visible columns in the widget:
-        if 's_region' in columns:
-            columns.remove('s_region')
+        if self.mission:
+            # by default, remove the `s_region`` column
+            # from the visible columns in the widget:
+            if 's_region' in columns:
+                columns.remove('s_region')
 
         self.headers_visible = [
             column for column in self.headers_avail
@@ -240,10 +249,10 @@ class MastTable(VuetifyTemplate):
 
         _table_widgets[len(_table_widgets)] = self
 
-        if update_viewport and self.app is not None:
+        if self.mission:
             ra_dec_colnames = dict(
                 hst=['sci_ra', 'sci_dec'],
-                roman=['ra_ref', 'dec_ref'],
+                roman=['ra', 'dec'],
                 jwst=['targ_ra', 'targ_def'],
             )
             ra_column, dec_column = ra_dec_colnames[self.mission]
@@ -254,8 +263,9 @@ class MastTable(VuetifyTemplate):
                 unit=u.deg
             )
 
-            # change the coordinate frame to match the coordinates in the MAST table:
-            self.app.target = f"{center_coord.ra.degree} {center_coord.dec.degree}"
+            if update_viewport and self.app is not None:
+                # change the coordinate frame to match the coordinates in the MAST table:
+                self.app.target = f"{center_coord.ra.degree} {center_coord.dec.degree}"
 
     @observe('table_options')
     def _table_options_changed(self, msg):
