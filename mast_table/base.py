@@ -238,10 +238,10 @@ class MastTable(VuetifyTemplate):
         if not self.table_options:
             self.table_options = {'page': 1, 'itemsPerPage': self.items_per_page}
 
-        self._all_items = serialize(table)
+        self._all_items = serialize(self.table)
         self.server_items_length = len(self._all_items)
         self._push_current_page()
-        columns = table.colnames
+        columns = self.table.colnames
 
         self._set_item_key(columns, unique_column)
 
@@ -259,7 +259,6 @@ class MastTable(VuetifyTemplate):
         _table_widgets[len(_table_widgets)] = self
 
         if mission := validate.detect_mission_or_products(table):
-
             self.column_descriptions = validate.get_column_descriptions(mission)
 
             # if the user hasn't defined the ra/dec columns, use
@@ -267,23 +266,24 @@ class MastTable(VuetifyTemplate):
             if ra_column is None and dec_column is None:
                 ra_column, dec_column = mission_mast_ra_dec_colnames[mission]
 
-            # if the ra/dec columns are available in the table:
-            if (
-                    ra_column in columns and
-                    dec_column in columns and
-                    update_viewport and
-                    self.app is not None):
+        # if the ra/dec columns are available in the table:
+        if (
+                ra_column in columns and
+                dec_column in columns and
+                update_viewport and
+                self.app is not None):
 
-                # calculate the mean sky coordinate of all entries
-                center_coord = SkyCoord(
-                    ra=table[ra_column][0] * u.deg,
-                    dec=table[dec_column][0] * u.deg,
-                    unit=u.deg
-                )
+            # use the first sky coordinate as a reference for centering the viewer.
+            # an alternative would be to use e.g. mean(RA), though means would return an
+            # unhelpful coordinate in the case where observations span the meridian or poles.
+            reference_coord = SkyCoord(
+                ra=self.table[ra_column][0] * u.deg,
+                dec=self.table[dec_column][0] * u.deg,
+                unit=u.deg
+            )
 
-                # set the center of the viewer on
-                # the mean sky coordinate of all entries
-                self.app.target = f"{center_coord.ra.degree} {center_coord.dec.degree}"
+            # set the center of the viewer on the reference coord:
+            self.app.target = f"{reference_coord.ra.degree} {reference_coord.dec.degree}"
 
     @observe('table_options')
     def _table_options_changed(self, msg):
