@@ -210,7 +210,10 @@ def CrossFilterSelect(
 
     def update_filter():
         if hasattr(table[column], 'mask'):
-            unmasked_values_as_strings = table[column].data[~table[column].mask].astype(str)
+            unmasked_values_as_strings = (
+                list(table[column].data[~table[column].mask].astype(str)) +
+                ['--']  # masked value
+            )
         else:
             unmasked_values_as_strings = table[column].astype(str)
         if (
