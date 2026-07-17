@@ -27,6 +27,13 @@ col_unique_row_index = '_unique_row_index'
 _table_widgets = dict()
 
 
+mission_mast_ra_dec_colnames = dict(
+    hst=['sci_ra', 'sci_dec'],
+    roman=['ra', 'dec'],
+    jwst=['targ_ra', 'targ_def'],
+)
+
+
 def _format_value(value, fmt):
     """
     Apply an astropy ``Column.info.format`` spec to a single ``value``.
@@ -178,6 +185,8 @@ class MastTable(VuetifyTemplate):
             app=None,
             update_viewport=True,
             unique_column=None,
+            ra_column=None,
+            dec_column=None,
             **kwargs):
         """
         Parameters
@@ -202,7 +211,17 @@ class MastTable(VuetifyTemplate):
             search through the table to find a column with unique rows.
 
             For tables with many rows, unique column searches are inefficient
-            and a warning will be raised..
+            and a warning will be raised.
+
+        ra_column : str (optional, default is `None`)
+            Column name for the right ascension in degrees.
+
+        dec_column : str (optional, default is `None`)
+            Column name for the declination in degrees.
+
+        **kwargs
+            Remaining keyword arguments are passed to
+            ``ipyvuetify.VuetifyTemplate``.
         """
 
         # initialize the row cache, so the ``table_options`` observer is safe to fire
@@ -224,11 +243,6 @@ class MastTable(VuetifyTemplate):
         self._push_current_page()
         columns = table.colnames
 
-        self.mission = validate.detect_mission_or_products(table)
-
-        if self.mission:
-            self.column_descriptions = validate.get_column_descriptions(self.mission)
-
         if unique_column:
             self._set_item_key(columns, unique_column)
 
@@ -236,12 +250,8 @@ class MastTable(VuetifyTemplate):
             column for column in columns if column != col_unique_row_index
         ]
 
-        if self.mission:
-            # by default, remove the `s_region`` column
-            # from the visible columns in the widget:
-            if 's_region' in columns:
-                columns.remove('s_region')
-
+        # by default, remove the `s_region`` column
+        # from the visible columns in the widget:
         self.headers_visible = [
             column for column in self.headers_avail
             if column != 's_region'
@@ -249,22 +259,31 @@ class MastTable(VuetifyTemplate):
 
         _table_widgets[len(_table_widgets)] = self
 
-        if self.mission:
-            ra_dec_colnames = dict(
-                hst=['sci_ra', 'sci_dec'],
-                roman=['ra', 'dec'],
-                jwst=['targ_ra', 'targ_def'],
-            )
-            ra_column, dec_column = ra_dec_colnames[self.mission]
+        if mission := validate.detect_mission_or_products(table):
 
-            center_coord = SkyCoord(
-                ra=table[ra_column][0] * u.deg,
-                dec=table[dec_column][0] * u.deg,
-                unit=u.deg
-            )
+            self.column_descriptions = validate.get_column_descriptions(mission)
 
-            if update_viewport and self.app is not None:
-                # change the coordinate frame to match the coordinates in the MAST table:
+            # if the user hasn't defined the ra/dec columns, use
+            # the expectated Mission Mast names for this mission:
+            if ra_column is None and dec_column is None:
+                ra_column, dec_column = mission_mast_ra_dec_colnames[mission]
+
+            # if the ra/dec columns are available in the table:
+            if (
+                    ra_column in columns and
+                    dec_column in columns and
+                    update_viewport and
+                    self.app is not None):
+
+                # calculate the mean sky coordinate of all entries
+                center_coord = SkyCoord(
+                    ra=table[ra_column][0] * u.deg,
+                    dec=table[dec_column][0] * u.deg,
+                    unit=u.deg
+                )
+
+                # set the center of the viewer on
+                # the mean sky coordinate of all entries
                 self.app.target = f"{center_coord.ra.degree} {center_coord.dec.degree}"
 
     @observe('table_options')
