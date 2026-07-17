@@ -209,9 +209,13 @@ def CrossFilterSelect(
     solara.use_memo(reset, dependencies=[column])
 
     def update_filter():
+        if hasattr(table[column], 'mask'):
+            unmasked_values_as_strings = table[column].data[~table[column].mask].astype(str)
+        else:
+            unmasked_values_as_strings = table[column].astype(str)
         if (
             len(filter_values) == 0 or
-            (not invert and set(filter_values).issuperset(table[column].astype(str)))
+            (not invert and set(filter_values).issuperset(unmasked_values_as_strings))
         ):
             set_mask(filter_id, None)
             return
