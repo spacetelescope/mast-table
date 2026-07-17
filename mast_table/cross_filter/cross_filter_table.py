@@ -641,9 +641,15 @@ def CrossFilterMastTable(table, **kwargs):
 
                     # creating add condition section
                     solara.Markdown("##Add condition")
+
+                    column_names = table.colnames
+                    if col_unique_row_index in column_names:
+                        # never give the internal unique column as an option
+                        column_names.remove(col_unique_row_index)
+
                     v.Select(
                         label="Column",
-                        items=table.colnames,
+                        items=column_names,
                         v_model=pending_column,
                         on_v_model=set_pending_column,
                     )
