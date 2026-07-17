@@ -243,8 +243,7 @@ class MastTable(VuetifyTemplate):
         self._push_current_page()
         columns = table.colnames
 
-        if unique_column:
-            self._set_item_key(columns, unique_column)
+        self._set_item_key(columns, unique_column)
 
         self.headers_avail = [
             column for column in columns if column != col_unique_row_index
