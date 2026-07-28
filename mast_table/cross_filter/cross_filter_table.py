@@ -724,7 +724,11 @@ def CrossFilterMastTable(table, **kwargs):
                         )
 
                         value = (
-                            {"value": unique_values[0]} if unique_values else None
+                            {"value": pending_value}
+                            if pending_value not in ("", None)
+                            else {"value": unique_values[0]}
+                            if unique_values
+                            else None
                         )
 
                         def set_pending_select_value(selection):
