@@ -14,7 +14,7 @@ import reacton.ipyvuetify as v
 from astropy.table import Table
 from mast_table.base import MastTable, serialize, col_unique_row_index
 from mast_table.cross_filter.utils import (
-    num_py_type, table_filter_values, table_range,
+    operator_map, num_py_type, table_filter_values, table_range,
     slide_or_select, step_size, build_select_items,
     build_select_filter_preview,
 )
@@ -361,14 +361,6 @@ def CrossFilterSlider(
     def update_filter():
         filter = None
         if filter_value:
-            operator_map = {
-                "==": operator.eq,
-                ">=": operator.ge,
-                "<=": operator.le,
-                ">": operator.gt,
-                "<": operator.lt,
-                "!=": operator.ne,
-            }
             filter = operator_map[mode](table[column], filter_value)
             if invert:
                 filter = ~filter
@@ -745,6 +737,12 @@ def CrossFilterMastTable(table, **kwargs):
                         label = f"Condition {pending_mode} {pending_value}"
                         solara.Markdown(label)
 
+                        table_filtered = table[
+                            combined_mask
+                        ] if combined_mask is not None else table
+                        comparison = operator_map[pending_mode]
+                        slider_mask = comparison(table_filtered[pending_column], pending_value)
+
                         if issubclass(py_type, (int, np.integer)):
                             solara.SliderInt(
                                 label="",
@@ -769,6 +767,13 @@ def CrossFilterMastTable(table, **kwargs):
                                 tick_labels=False,
                             )
 
+                        solara.Markdown(
+                            (
+                                f"<div style='font-size: 12px; text-align: right;'>"
+                                f"{len(table_filtered[slider_mask])} of {len(table_filtered)} "
+                                "after filtering</div>"
+                            )
+                        )
                     else:
                         unique_values, fully_masked = build_select_items(
                             table[pending_column]
