@@ -2,6 +2,17 @@ import numpy as np
 from astropy.table import Table, join
 import math
 import warnings
+import operator
+
+
+operator_map = {
+    "==": operator.eq,
+    ">=": operator.ge,
+    "<=": operator.le,
+    ">": operator.gt,
+    "<": operator.lt,
+    "!=": operator.ne,
+}
 
 
 def num_py_type(table, col):
