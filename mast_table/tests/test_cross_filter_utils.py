@@ -2,7 +2,7 @@ import numpy as np
 from astropy.table import Table
 import pytest
 import random
-from mast_table import cross_filter_helpers
+from mast_table import cross_filter_utils
 
 
 @pytest.fixture
@@ -26,17 +26,17 @@ def test_num_py_type():
             "test4": ["a", "a", "a", "b", "b", "c"],
         }
     )
-    py_type = cross_filter_helpers.num_py_type(test_table, "test1")
+    py_type = cross_filter_utils.num_py_type(test_table, "test1")
     assert issubclass(py_type, (int, np.integer))
 
-    py_type = cross_filter_helpers.num_py_type(test_table, "test2")
+    py_type = cross_filter_utils.num_py_type(test_table, "test2")
     issubclass(py_type, (float, np.floating))
 
     with pytest.warns(UserWarning, match="not supported for Slider"):
-        cross_filter_helpers.num_py_type(test_table, "test3")
+        cross_filter_utils.num_py_type(test_table, "test3")
 
     with pytest.warns(UserWarning, match="not supported for Slider"):
-        cross_filter_helpers.num_py_type(test_table, "test4")
+        cross_filter_utils.num_py_type(test_table, "test4")
 
 
 def test_table_value_count(test_table):
@@ -46,28 +46,28 @@ def test_table_value_count(test_table):
     test_table["test3"].mask = full_mask
 
     # getting counts for unmasked
-    val_counts = cross_filter_helpers.table_value_count(test_table, "test1", 3)
+    val_counts = cross_filter_utils.table_value_count(test_table, "test1", 3)
     assert isinstance(val_counts, Table)
     assert val_counts.colnames == ["value", "count"]
     assert (val_counts["value"] == ["a", "b", "c"]).all()
     assert (val_counts["count"] == [3, 2, 1]).all()
 
     # checking limit arg
-    val_counts = cross_filter_helpers.table_value_count(test_table, "test1", 1)
+    val_counts = cross_filter_utils.table_value_count(test_table, "test1", 1)
     assert isinstance(val_counts, Table)
     assert val_counts.colnames == ["value", "count"]
     assert val_counts["value"] == ["a"]
     assert val_counts["count"] == 3
 
     # getting counts for partially masked
-    val_counts = cross_filter_helpers.table_value_count(test_table, "test2", 3)
+    val_counts = cross_filter_utils.table_value_count(test_table, "test2", 3)
     assert isinstance(val_counts, Table)
     assert val_counts.colnames == ["value", "count"]
     assert (val_counts["value"] == ["--", "a", "b"]).all()
     assert (val_counts["count"] == [3, 2, 1]).all()
 
     # getting counts for fully masked
-    val_counts = cross_filter_helpers.table_value_count(test_table, "test3", 3)
+    val_counts = cross_filter_utils.table_value_count(test_table, "test3", 3)
     assert isinstance(val_counts, Table)
     assert val_counts.colnames == ["value", "count"]
     assert val_counts["value"] == "--"
@@ -84,39 +84,39 @@ def test_table_filter_values(test_table):
     test_table["test3"].mask = full_mask
 
     # checking unmasked (as-is and inverted)
-    filter = cross_filter_helpers.table_filter_values(
+    filter = cross_filter_utils.table_filter_values(
         test_table, "test1", test_values
     )
     assert isinstance(filter, np.ndarray)
     assert np.all(filter)
 
-    filter_inverted = cross_filter_helpers.table_filter_values(
+    filter_inverted = cross_filter_utils.table_filter_values(
         test_table, "test1", test_values, invert=True
     )
     assert isinstance(filter_inverted, np.ndarray)
     assert np.all(~filter_inverted)
 
     # checking partially masked (as-is and inverted)
-    filter = cross_filter_helpers.table_filter_values(
+    filter = cross_filter_utils.table_filter_values(
         test_table, "test2", test_values
     )
     assert isinstance(filter, np.ndarray)
     assert (filter == ~partial_mask).all()
 
-    filter_inverted = cross_filter_helpers.table_filter_values(
+    filter_inverted = cross_filter_utils.table_filter_values(
         test_table, "test2", test_values, invert=True
     )
     assert isinstance(filter_inverted, np.ndarray)
     assert (filter_inverted == partial_mask).all()
 
     # checking fully masked (as-is and inverted)
-    filter = cross_filter_helpers.table_filter_values(
+    filter = cross_filter_utils.table_filter_values(
         test_table, "test3", test_values
     )
     assert isinstance(filter, np.ndarray)
     assert (filter == ~full_mask).all()
 
-    filter_inverted = cross_filter_helpers.table_filter_values(
+    filter_inverted = cross_filter_utils.table_filter_values(
         test_table, "test3", test_values, invert=True
     )
     assert isinstance(filter_inverted, np.ndarray)
@@ -132,12 +132,12 @@ def test_table_range():
     )
 
     # integers
-    test_range = cross_filter_helpers.table_range(test_table, "test1")
+    test_range = cross_filter_utils.table_range(test_table, "test1")
     assert isinstance(test_range, tuple)
     assert test_range == (1, 6)
 
     # floats
-    test_range = cross_filter_helpers.table_range(test_table, "test2")
+    test_range = cross_filter_utils.table_range(test_table, "test2")
     assert isinstance(test_range, tuple)
     assert test_range == (0.005, 11.3)
 
@@ -152,17 +152,17 @@ def test_slide_or_select():
     )
 
     # non-number select
-    non_num = cross_filter_helpers.slide_or_select(test_table, "test1")
+    non_num = cross_filter_utils.slide_or_select(test_table, "test1")
     assert isinstance(non_num, str)
     assert non_num == "select"
 
     # number select
-    num_sel = cross_filter_helpers.slide_or_select(test_table, "test2")
+    num_sel = cross_filter_utils.slide_or_select(test_table, "test2")
     assert isinstance(num_sel, str)
     assert num_sel == "select"
 
     # number slider
-    num_slide = cross_filter_helpers.slide_or_select(test_table, "test3")
+    num_slide = cross_filter_utils.slide_or_select(test_table, "test3")
     assert isinstance(num_slide, str)
     assert num_slide == "slider"
 
@@ -179,7 +179,7 @@ def test_slide_or_select():
     ],
 )
 def test_step_size(vmin, vmax, expected):
-    step_size = cross_filter_helpers.step_size(vmin, vmax)
+    step_size = cross_filter_utils.step_size(vmin, vmax)
     assert step_size == expected
 
 
@@ -191,17 +191,17 @@ def test_build_select_items(test_table):
     test_table["test3"].mask = full_mask
 
     # checking unmasked
-    unique_values, fully_masked = cross_filter_helpers.build_select_items(test_table["test1"])
+    unique_values, fully_masked = cross_filter_utils.build_select_items(test_table["test1"])
     assert unique_values == ["a", "b", "c"]
     assert not fully_masked
 
     # checking partially masked
-    unique_values, fully_masked = cross_filter_helpers.build_select_items(test_table["test2"])
+    unique_values, fully_masked = cross_filter_utils.build_select_items(test_table["test2"])
     assert unique_values == ["a", "b"]
     assert not fully_masked
 
     # checking fully masked
-    unique_values, fully_masked = cross_filter_helpers.build_select_items(test_table["test3"])
+    unique_values, fully_masked = cross_filter_utils.build_select_items(test_table["test3"])
     assert unique_values == []
     assert fully_masked
 
@@ -214,7 +214,7 @@ def test_build_select_filter_preview():
     )
 
     # unfiltered table
-    items, value_counts = cross_filter_helpers.build_select_filter_preview(test_table, "test1")
+    items, value_counts = cross_filter_utils.build_select_filter_preview(test_table, "test1")
     assert isinstance(items, list)
     assert isinstance(value_counts, Table)
 
@@ -235,7 +235,7 @@ def test_build_select_filter_preview():
     )
 
     # checking max_unique
-    items, value_counts = cross_filter_helpers.build_select_filter_preview(
+    items, value_counts = cross_filter_utils.build_select_filter_preview(
         test_table, "test1", max_unique=0
     )
     assert isinstance(items, list)
@@ -258,7 +258,7 @@ def test_build_select_filter_preview():
     # filtered table
     mask = test_table["test1"] == "a"
     test_table_filtered = test_table[mask]
-    items, value_counts = cross_filter_helpers.build_select_filter_preview(
+    items, value_counts = cross_filter_utils.build_select_filter_preview(
         test_table, "test1", table_filtered=test_table_filtered
     )
     assert isinstance(items, list)

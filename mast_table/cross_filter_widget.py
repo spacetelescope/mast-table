@@ -13,7 +13,7 @@ import reacton.ipyvuetify as v
 
 from astropy.table import Table
 from mast_table.base import BaseMastTable, serialize, col_unique_row_index
-from mast_table.cross_filter_helpers import (
+from mast_table.cross_filter_utils import (
     operator_map, num_py_type, table_filter_values, table_range,
     slide_or_select, step_size, build_select_items,
     build_select_filter_preview,
