@@ -12,8 +12,8 @@ from solara.components.cross_filter import Select
 import reacton.ipyvuetify as v
 
 from astropy.table import Table
-from mast_table.base import MastTable, serialize, col_unique_row_index
-from mast_table.cross_filter.utils import (
+from mast_table.base import BaseMastTable, serialize, col_unique_row_index
+from mast_table.cross_filter_helpers import (
     operator_map, num_py_type, table_filter_values, table_range,
     slide_or_select, step_size, build_select_items,
     build_select_filter_preview,
@@ -476,7 +476,7 @@ def SelectableTable(
         def on_change(change):
             set_drawer_open(change["new"])
 
-        mt = MastTable(
+        mt = BaseMastTable(
             table,
             item_key=col_unique_row_index,
             items_per_page=items_per_page,
@@ -506,7 +506,7 @@ def SelectableTable(
 
 
 @solara.component
-def CrossFilterMastTable(table, **kwargs):
+def MastTable(table, **kwargs):
     """A selectable table that participates in cross-filtering.
 
     * Incoming cross-filters from other components narrow which rows

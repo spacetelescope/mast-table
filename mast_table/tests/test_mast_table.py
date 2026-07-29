@@ -1,12 +1,11 @@
-from mast_table import MastTable
-from mast_table.base import serialize
+from mast_table.base import BaseMastTable, serialize
 import numpy as np
 import astropy.units as u
 from astropy.table import Table
 
 
 def test_mast_table_init(mast_observation_table):
-    mast_table = MastTable(mast_observation_table)
+    mast_table = BaseMastTable(mast_observation_table)
 
     # check that astropy table is stored on the widget
     assert 's_region' in mast_table.table.colnames
@@ -25,7 +24,7 @@ def test_mast_table_init(mast_observation_table):
 def test_server_side_pagination(mast_observation_table):
     # fixture has 5 rows
     n_rows = len(mast_observation_table)
-    mast_table = MastTable(mast_observation_table, items_per_page=2)
+    mast_table = BaseMastTable(mast_observation_table, items_per_page=2)
 
     # full row cache holds every row, while only the first page is pushed to the UI
     assert mast_table.server_pagination is True
@@ -44,7 +43,7 @@ def test_server_side_pagination(mast_observation_table):
 
 
 def test_server_side_pagination_disabled(mast_observation_table):
-    mast_table = MastTable(mast_observation_table, server_pagination=False)
+    mast_table = BaseMastTable(mast_observation_table, server_pagination=False)
     # verify the kwarg actually reached the traitlet
     assert mast_table.server_pagination is False
     # with server pagination disabled, the full table is pushed to the UI
@@ -93,7 +92,7 @@ def test_column_format_propagates_to_widget(mast_observation_table):
     )
     assert col is not None
     mast_observation_table[col].info.format = '.2f'
-    mast_table = MastTable(mast_observation_table)
+    mast_table = BaseMastTable(mast_observation_table)
     # every cached row should have the formatted (string) value for this column
     for row in mast_table._all_items:
         value = row[col]

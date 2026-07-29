@@ -17,7 +17,7 @@ from mast_table import validate
 from astroquery.mast import MastMissions
 
 __all__ = [
-    'MastTable',
+    'BaseMastTable',
     'get_current_table',
 ]
 
@@ -145,7 +145,7 @@ known_unique_mast_table_cols = [
 ]
 
 
-class MastTable(VuetifyTemplate):
+class BaseMastTable(VuetifyTemplate):
     """
     Table widget for observation queries from Mission MAST.
     """
@@ -433,4 +433,4 @@ def get_current_table():
         latest_table_index = list(_table_widgets.keys())[-1]
         return _table_widgets[latest_table_index]
 
-    return MastTable()
+    return BaseMastTable()
