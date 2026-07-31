@@ -2,8 +2,10 @@
   <v-row class="mast-table">
     <v-col cols="auto">
       <v-btn class="{'conditions-active': filter_tray_open}" @click="filter_tray_open = !filter_tray_open" :color="filter_tray_open ? '#b4dbe9' : undefined">
-        Conditions
-        <v-icon right>mdi-filter</v-icon>
+        {{ filter_tray_open ? 'Hide Conditions' : 'Show Conditions' }}
+        <v-icon right>
+          {{ filter_tray_open ? 'mdi-chevron-left' : 'mdi-chevron-right' }}
+        </v-icon>
       </v-btn>
     </v-col>
   <div v-if="show_if_empty || items.length">
