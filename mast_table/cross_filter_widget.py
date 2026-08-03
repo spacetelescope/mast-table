@@ -161,7 +161,6 @@ def CrossFilterSelect(
     set_mask: Callable,
     table_filtered: Table,
     initial_values=None,
-    on_remove=None,
     max_unique: int = 100,
     multiple: bool = False,
     invert: bool = False,
@@ -177,7 +176,6 @@ def CrossFilterSelect(
     - `filter_id`: The unique filter instance ID.
     - `set_mask`: Callback for updating filter's mask.
     - `initial_values`: The initial values to set as selected.
-    - `on_remove`: Callback to remove this filter from parent filter list.
     - `max_unique`: The maximum number of unique values to show in the dropdown.
     - `multiple`: Whether to allow multiple values to be selected.
     - `invert`: Whether to invert the selection.
@@ -256,30 +254,7 @@ def CrossFilterSelect(
     )
 
     with solara.VBox(classes=classes) as main:
-        with solara.Row(
-            style={
-                "align-items": "flex-start",
-                "padding": "0",
-                "margin": "0",
-            }
-        ):
-            solara.Markdown(f"**{column}**")
-            with solara.Div(
-                style={
-                    "margin-left": "auto",
-                    "margin-top": "-8px",
-                    "margin-right": "-8px"
-                }
-            ):
-                if on_remove is not None:
-                    RemoveConditionButton(filter_id, on_remove)
-
-        with solara.Column(style={
-            "gap": "0",
-            "padding": "0",
-            "margin": "0",
-        }):
-
+        with solara.Column():
             # creating selection dropdown
             label = (
                 "Condition = " if not invert else "Condition != "
@@ -320,7 +295,6 @@ def CrossFilterSlider(
     filter_id: str,
     set_mask: Callable,
     initial_value=None,
-    on_remove=None,
     invert: bool = False,
     mode: str = ">=",
     configurable: bool = True,
@@ -337,7 +311,6 @@ def CrossFilterSlider(
     - `filter_id`: The unique filter instance ID.
     - `set_mask`: Callback for updating filter's mask.
     - `initial_value`: The initial value to set for the slider.
-    - `on_remove`: Callback to remove this filter from parent filter list.
     - `invert`: If True, the filter will be inverted.
     - `mode`: The mode to use for filtering. Can be one of `==`, `>=`, `<=`, `>`, `<`.
     - `configurable`: Whether to show a configuration button.
@@ -377,24 +350,6 @@ def CrossFilterSlider(
         label = f"Condition {mode} " if not invert else f"Drop condition {mode} "
         if filter_value is not None:
             label = label + f"{filter_value}"
-        with solara.Row(
-            style={
-                "align-items": "flex-start",
-                "padding": "0",
-                "margin": "0",
-            }
-        ):
-            solara.Markdown(f"**{column}**")
-
-            with solara.Div(
-                style={
-                    "margin-left": "auto",
-                    "margin-top": "-8px",
-                    "margin-right": "-8px"
-                }
-            ):
-                if on_remove is not None:
-                    RemoveConditionButton(filter_id, on_remove)
 
         solara.Markdown(label, style={"color": "#6c6c6c", "font-size": "0.85em"})
         slider_args = {
@@ -594,6 +549,7 @@ def MastTable(table, **kwargs):
         )
 
     solara.lab.theme.themes.light.primary = "#00627e"
+    expanded_ids, set_expanded_ids = solara.use_state(set())
 
     with solara.Column(
         style={
@@ -636,7 +592,24 @@ def MastTable(table, **kwargs):
                     # creating slide/select for each active condition
                     for i, f in enumerate(filters):
                         with solara.Row(style={"width": "100%"}):
+                            solara.Style(
+                                """
+                                .filter-card .v-card {
+                                    padding: 0 !important;
+                                }
+
+                                .filter-card .v-card__text {
+                                    padding: 4px 8px !important;
+                                }
+
+                                .filter-card .v-card__actions {
+                                    padding: 0px 8px !important;
+                                }
+                                """
+                            )
+
                             with solara.Card(
+                                classes=["filter-card"],
                                 style={
                                     "border": "2px solid #00627e",
                                     "box-shadow": "none",
@@ -645,49 +618,101 @@ def MastTable(table, **kwargs):
                             ):
                                 opt = slide_or_select(table, f["column"])
                                 initial_val = f["value"] if f.get("value") is not None else None
-                                if opt == "slider":
-                                    CrossFilterSlider(
-                                        table,
-                                        f["column"],
-                                        filter_id=f["id"],
-                                        set_mask=set_mask,
-                                        mode=f["mode"],
-                                        initial_value=initial_val,
-                                        on_remove=remove_filter
-                                    )
-                                else:
-                                    other_masks = [
-                                        mask
-                                        for fid, mask in filter_masks.items()
-                                        if fid != f["id"] and mask is not None
-                                    ]
 
-                                    if not other_masks:
-                                        table_filtered = table
-                                    elif pending_reducer == "AND":
-                                        table_filtered = table[
-                                            functools.reduce(
-                                                operator.and_,
-                                                other_masks
-                                            )
-                                        ]
+                                is_expanded = f["id"] in expanded_ids
+
+                                def toggle(filter_id=f["id"]):
+                                    ids = set(expanded_ids)
+                                    if filter_id in ids:
+                                        ids.remove(filter_id)
                                     else:
-                                        table_filtered = table[
-                                            functools.reduce(
-                                                operator.or_,
-                                                other_masks
-                                            )
+                                        ids.add(filter_id)
+                                    set_expanded_ids(ids)
+
+                                with solara.Row(
+                                    style={
+                                        "align-items": "center",
+                                        "justify-content": "space-between",
+                                        "width": "100%",
+                                        "padding": 0,
+                                    }
+                                ):
+                                    solara.Style(
+                                        """
+                                        .v-btn.filter-column {
+                                            text-transform: none !important;
+                                            font-family: inherit !important;
+                                            font-size: inherit !important;
+                                            font-weight: bold !important;
+                                            letter-spacing: normal !important;
+                                        }
+                                        """
+                                    )
+                                    solara.Button(
+                                        label=f["column"],
+                                        on_click=toggle,
+                                        text=True,
+                                        classes=["filter-column"],
+                                        style={
+                                            "margin-left": "-8px",
+                                            "justify-content": "flex-start",
+                                            "text-align": "left",
+                                            "padding-left": "8px",
+                                            "padding-right": "8px",
+                                            "min-width": "0",
+                                            "flex-grow": "1",
+                                        },
+                                    )
+
+                                    with solara.Div():
+                                        RemoveConditionButton(f["id"], remove_filter)
+
+                                with solara.Div(
+                                    style={
+                                        "display": "block" if is_expanded else "none"
+                                    }
+                                ):
+                                    if opt == "slider":
+                                        CrossFilterSlider(
+                                            table,
+                                            f["column"],
+                                            filter_id=f["id"],
+                                            set_mask=set_mask,
+                                            mode=f["mode"],
+                                            initial_value=initial_val,
+                                        )
+                                    else:
+                                        other_masks = [
+                                            mask
+                                            for fid, mask in filter_masks.items()
+                                            if fid != f["id"] and mask is not None
                                         ]
 
-                                    CrossFilterSelect(
-                                        table,
-                                        f["column"],
-                                        filter_id=f["id"],
-                                        set_mask=set_mask,
-                                        initial_values=initial_val,
-                                        on_remove=remove_filter,
-                                        table_filtered=table_filtered
-                                    )
+                                        if not other_masks:
+                                            table_filtered = table
+                                        elif pending_reducer == "AND":
+                                            table_filtered = table[
+                                                functools.reduce(
+                                                    operator.and_,
+                                                    other_masks
+                                                )
+                                            ]
+                                        else:
+                                            table_filtered = table[
+                                                functools.reduce(
+                                                    operator.or_,
+                                                    other_masks
+                                                )
+                                            ]
+
+                                        CrossFilterSelect(
+                                            table,
+                                            f["column"],
+                                            filter_id=f["id"],
+                                            set_mask=set_mask,
+                                            initial_values=initial_val,
+                                            table_filtered=table_filtered
+                                        )
 
                     if not len(filters):
                         solara.Markdown("No active conditions")
