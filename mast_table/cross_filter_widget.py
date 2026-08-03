@@ -294,6 +294,7 @@ def CrossFilterSlider(
     column: str,
     filter_id: str,
     set_mask: Callable,
+    set_filter_mode: Callable,
     initial_value=None,
     invert: bool = False,
     mode: str = ">=",
@@ -310,6 +311,7 @@ def CrossFilterSlider(
     - `column`: The column to filter on.
     - `filter_id`: The unique filter instance ID.
     - `set_mask`: Callback for updating filter's mask.
+    - `set_filter_mode`: Callback for updating filter's mode.
     - `initial_value`: The initial value to set for the slider.
     - `invert`: If True, the filter will be inverted.
     - `mode`: The mode to use for filtering. Can be one of `==`, `>=`, `<=`, `>`, `<`.
@@ -323,6 +325,10 @@ def CrossFilterSlider(
     )
     invert, set_invert = solara.use_state_or_update(invert)
     mode, set_mode = solara.use_state_or_update(mode)
+
+    def update_mode(new_mode):
+        set_mode(new_mode)
+        set_filter_mode(new_mode)
 
     vmin, vmax = table_range(table, column)
 
@@ -374,7 +380,7 @@ def CrossFilterSlider(
                 invert,
                 set_invert,
                 mode=mode,
-                set_mode=set_mode
+                set_mode=update_mode,
             )
 
     return main
@@ -520,6 +526,14 @@ def MastTable(table, **kwargs):
         updated.pop(filter_id, None)
         set_filter_masks(updated)
 
+    def update_filter_mode(filter_id, new_mode):
+        set_filters(
+            [
+                {**f, "mode": new_mode} if f["id"] == filter_id else f
+                for f in filters
+            ]
+        )
+
     def set_mask(filter_id, mask):
         updated = dict(filter_masks)
 
@@ -648,8 +662,13 @@ def MastTable(table, **kwargs):
                                         }
                                         """
                                     )
+
+                                    label = f["column"]
+                                    if opt =="slider":
+                                        label += " "+f["mode"]
+
                                     solara.Button(
-                                        label=f["column"],
+                                        label=label,
                                         on_click=toggle,
                                         text=True,
                                         classes=["filter-column"],
@@ -678,6 +697,7 @@ def MastTable(table, **kwargs):
                                             f["column"],
                                             filter_id=f["id"],
                                             set_mask=set_mask,
+                                            set_filter_mode=lambda new_mode: update_filter_mode(f["id"], new_mode),
                                             mode=f["mode"],
                                             initial_value=initial_val,
                                         )
