@@ -303,10 +303,6 @@ def CrossFilterSelect(
 
             # creating settings menu
             if configurable:
-                """with solara.Div(style={
-                    "padding": "0",
-                    "margin": "0",
-                }):"""
                 SettingsMenu(
                     invert,
                     set_invert,
