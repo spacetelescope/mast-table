@@ -664,7 +664,7 @@ def MastTable(table, **kwargs):
                                     )
 
                                     label = f["column"]
-                                    if opt =="slider":
+                                    if opt == "slider":
                                         label += " "+f["mode"]
 
                                     solara.Button(
@@ -697,7 +697,9 @@ def MastTable(table, **kwargs):
                                             f["column"],
                                             filter_id=f["id"],
                                             set_mask=set_mask,
-                                            set_filter_mode=lambda new_mode: update_filter_mode(f["id"], new_mode),
+                                            set_filter_mode=lambda new_mode: update_filter_mode(
+                                                f["id"], new_mode
+                                            ),
                                             mode=f["mode"],
                                             initial_value=initial_val,
                                         )
