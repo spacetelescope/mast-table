@@ -255,35 +255,105 @@ def CrossFilterSelect(
 
     with solara.VBox(classes=classes) as main:
         with solara.Column():
-            # creating selection dropdown
-            label = (
-                "Condition = " if not invert else "Condition != "
-            )
-            Select.element(
-                value=value,
-                items=items,
-                on_value=set_values_and_filter,
-                label=label,
-                clearable=False,
-                return_object=True,
-                multiple=multiple,
-                filtered=len(filter_values) > 0,
-                count=len(table_filtered),
-                messages=(
-                    f"Too many unique values, will only show the first {max_unique}"
-                    if len(value_counts) > max_unique else ""
-                ),
-                class_="solara-cross-filter-select",
-            )
+            if len(items) < 5:
+                with v.Container(
+                    fluid=True,
+                    class_="pa-0 ma-0 compact-checkboxes",
+                ):
+                    for opt in items:
+                        checked = opt["value"] in filter_values
 
-            # creating settings menu
-            if configurable:
-                SettingsMenu(
-                    invert,
-                    set_invert,
-                    multiple=multiple,
-                    set_multiple=set_multiple
+                        def toggle_value(checked, value=opt["value"]):
+                            if checked:
+                                set_filter_values(filter_values + [value])
+                            else:
+                                set_filter_values(
+                                    [v for v in filter_values if v != value]
+                                )
+                        solara.Style(
+                            """
+                            .compact-checkboxes .v-input {
+                                margin-bottom: 0px !important;
+                                margin-top: 0px !important;
+                            }
+
+                            .compact-checkboxes .v-input__control {
+                                min-height: 24px !important;
+                            }
+
+                            .compact-checkboxes .v-input__slot {
+                                margin: 0 !important;
+                                min-height: 24px !important;
+                            }
+
+                            .compact-checkboxes .v-input--selection-controls {
+                                margin-top: 0 !important;
+                                margin-bottom: 0 !important;
+                                padding-top: 0 !important;
+                                padding-bottom: 0 !important;
+                            }
+                            """
+                        )
+                        solara.Checkbox(
+                            value=checked,
+                            on_value=toggle_value,
+                            label=opt["text"],
+                        )
+
+                    with solara.Row(
+                        style={
+                            "align-items": "center",
+                            "justify-content": "space-between",
+                            "width": "100%",
+                            "padding": 0,
+                        }
+                    ):
+                        solara.Button(
+                            "Select All",
+                            on_click=lambda: set_filter_values(
+                                [item["value"] for item in items]
+                            ),
+                            text=True,
+                            style={"background-color": "#00627e", "color": "white"}
+                        )
+
+                        solara.Button(
+                            "Clear All",
+                            on_click=lambda: set_filter_values([]),
+                            text=True,
+                            style={"background-color": "#00627e", "color": "white"}
+                        )
+
+            else:
+                # creating selection dropdown
+                label = (
+                    "Condition = " if not invert else "Condition != "
                 )
+                Select.element(
+                    value=value,
+                    items=items,
+                    on_value=set_values_and_filter,
+                    label=label,
+                    clearable=False,
+                    return_object=True,
+                    multiple=multiple,
+                    filtered=len(filter_values) > 0,
+                    count=len(table_filtered),
+                    messages=(
+                        f"Too many unique values, will only show the first {max_unique}"
+                        if len(value_counts) > max_unique else ""
+                    ),
+                    class_="solara-cross-filter-select",
+                )
+
+                # creating settings menu
+                if configurable:
+                    SettingsMenu(
+                        invert,
+                        set_invert,
+                        multiple=multiple,
+                        set_multiple=set_multiple
+                    )
 
     return main
 
