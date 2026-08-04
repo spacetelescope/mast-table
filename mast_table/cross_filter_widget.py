@@ -414,22 +414,64 @@ def CrossFilterSlider(
         if filter_value is not None:
             label = label + f"{filter_value}"
 
-        solara.Markdown(label, style={"color": "#6c6c6c", "font-size": "0.85em"})
+        solara.Style(
+            """
+            .crossfilter-slider .v-slider__thumb::before {
+                display: none !important;
+            }
+
+            .crossfilter-slider .v-input--is-focused .v-slider__thumb::before {
+                display: none !important;
+            }
+            """
+        )
         slider_args = {
             "label": "",
-            "value": filter_value,
             "min": vmin,
             "max": vmax,
             "step": step_size(vmin, vmax),
-            "on_value": set_filter_value,
-            "thumb_label": True,
+            "thumb_label": False,
             "tick_labels": False,
         }
         # creating slider
-        if issubclass(py_type, (int, np.integer)):
-            solara.SliderInt(**slider_args)
-        elif issubclass(py_type, (float, np.floating)):
-            solara.SliderFloat(**slider_args)
+        with solara.Row(
+            style={"alignItems": "end"},
+            classes=["crossfilter-slider"]
+        ):
+            if issubclass(py_type, (int, np.integer)):
+                solara.InputInt(
+                    label=None,
+                    value=filter_value,
+                    on_value=set_filter_value,
+                    continuous_update=False,
+                    style={
+                        "max-width": "50px",
+                        "padding-top": "5px",
+                        "padding-bottom": "5px"
+                    }
+                )
+                solara.SliderInt(
+                    value=filter_value,
+                    on_value=set_filter_value,
+                    **slider_args
+                )
+            elif issubclass(py_type, (float, np.floating)):
+                solara.InputFloat(
+                    label=None,
+                    value=filter_value,
+                    on_value=set_filter_value,
+                    continuous_update=False,
+                    style={
+                        "max-width": "50px",
+                        "padding-top": "5px",
+                        "padding-bottom": "5px"
+                    }
+                )
+                solara.SliderFloat(
+                    value=filter_value,
+                    on_value=set_filter_value,
+                    **slider_args
+                )
 
         # creating settings menu
         if configurable:
