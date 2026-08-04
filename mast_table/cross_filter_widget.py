@@ -76,8 +76,6 @@ def FilterModeButtons(
 def SettingsMenu(
     invert,
     set_invert,
-    mode=None,
-    set_mode=None,
     multiple=None,
     set_multiple=None
 ):
@@ -87,8 +85,6 @@ def SettingsMenu(
     ----------
     - `invert`: Whether to invert the selection.
     - `set_invert`: Callback for updating filter's inversion.
-    - `mode`: The astropy Table to filter.
-    - `set_mode`: Callback for updating filter's mask.
     - `multiple`: Whether to allow multiple values to be selected.
     - `set_multiple`: Callback for updating filter's ability to select multiple values.
 
@@ -104,13 +100,6 @@ def SettingsMenu(
             hide_details=True,
             dense=True,
         )
-
-        if mode:
-            FilterModeButtons(
-                mode=mode,
-                set_mode=set_mode,
-                dense=True,
-            )
 
         if multiple is not None:
             v.Switch(
@@ -296,7 +285,6 @@ def CrossFilterSlider(
     set_mask: Callable,
     set_filter_mode: Callable,
     initial_value=None,
-    invert: bool = False,
     mode: str = ">=",
     configurable: bool = True,
 ):
@@ -313,7 +301,6 @@ def CrossFilterSlider(
     - `set_mask`: Callback for updating filter's mask.
     - `set_filter_mode`: Callback for updating filter's mode.
     - `initial_value`: The initial value to set for the slider.
-    - `invert`: If True, the filter will be inverted.
     - `mode`: The mode to use for filtering. Can be one of `==`, `>=`, `<=`, `>`, `<`.
     - `configurable`: Whether to show a configuration button.
 
@@ -323,7 +310,6 @@ def CrossFilterSlider(
         lambda: set_filter_value(initial_value),
         [initial_value],
     )
-    invert, set_invert = solara.use_state_or_update(invert)
     mode, set_mode = solara.use_state_or_update(mode)
 
     def update_mode(new_mode):
@@ -346,14 +332,12 @@ def CrossFilterSlider(
         filter = None
         if filter_value:
             filter = operator_map[mode](table[column], filter_value)
-            if invert:
-                filter = ~filter
         set_mask(filter_id, filter)
 
-    solara.use_memo(update_filter, dependencies=[filter_value, invert, mode])
+    solara.use_memo(update_filter, dependencies=[filter_value, mode])
 
     with solara.VBox() as main:
-        label = f"Condition {mode} " if not invert else f"Drop condition {mode} "
+        label = f"Condition {mode} "
         if filter_value is not None:
             label = label + f"{filter_value}"
 
@@ -376,11 +360,10 @@ def CrossFilterSlider(
 
         # creating settings menu
         if configurable:
-            SettingsMenu(
-                invert,
-                set_invert,
+            FilterModeButtons(
                 mode=mode,
                 set_mode=update_mode,
+                dense=True,
             )
 
     return main
