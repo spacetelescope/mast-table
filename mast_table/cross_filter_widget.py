@@ -256,6 +256,32 @@ def CrossFilterSelect(
     with solara.VBox(classes=classes) as main:
         with solara.Column():
             if len(items) < 5:
+                # set styling for compact checkboxes
+                solara.Style(
+                    """
+                    .compact-checkboxes .v-input {
+                        margin-bottom: 0px !important;
+                        margin-top: 0px !important;
+                    }
+
+                    .compact-checkboxes .v-input__control {
+                        min-height: 24px !important;
+                    }
+
+                    .compact-checkboxes .v-input__slot {
+                        margin: 0 !important;
+                        min-height: 24px !important;
+                    }
+
+                    .compact-checkboxes .v-input--selection-controls {
+                        margin-top: 0 !important;
+                        margin-bottom: 0 !important;
+                        padding-top: 0 !important;
+                        padding-bottom: 0 !important;
+                    }
+                    """
+                )
+
                 with v.Container(
                     fluid=True,
                     class_="pa-0 ma-0 compact-checkboxes",
@@ -270,30 +296,7 @@ def CrossFilterSelect(
                                 set_filter_values(
                                     [v for v in filter_values if v != value]
                                 )
-                        solara.Style(
-                            """
-                            .compact-checkboxes .v-input {
-                                margin-bottom: 0px !important;
-                                margin-top: 0px !important;
-                            }
 
-                            .compact-checkboxes .v-input__control {
-                                min-height: 24px !important;
-                            }
-
-                            .compact-checkboxes .v-input__slot {
-                                margin: 0 !important;
-                                min-height: 24px !important;
-                            }
-
-                            .compact-checkboxes .v-input--selection-controls {
-                                margin-top: 0 !important;
-                                margin-bottom: 0 !important;
-                                padding-top: 0 !important;
-                                padding-bottom: 0 !important;
-                            }
-                            """
-                        )
                         solara.Checkbox(
                             value=checked,
                             on_value=toggle_value,
