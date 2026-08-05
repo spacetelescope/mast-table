@@ -870,11 +870,12 @@ def MastTable(table, **kwargs):
                     solara.Markdown("##Add condition")
 
                     column_names = table.colnames
+                    column_names.sort(key=str.casefold)
                     if col_unique_row_index in column_names:
                         # never give the internal unique column as an option
                         column_names.remove(col_unique_row_index)
 
-                    v.Select(
+                    v.Autocomplete(
                         label="Column",
                         items=column_names,
                         v_model=pending_column,
