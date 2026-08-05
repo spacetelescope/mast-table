@@ -425,6 +425,17 @@ def CrossFilterSlider(
             }
             """
         )
+
+        input_args = {
+            "label": None,
+            "continuous_update": False,
+            "style": {
+                "max-width": "50px",
+                "padding-top": "5px",
+                "padding-bottom": "5px"
+            },
+        }
+
         slider_args = {
             "label": "",
             "min": vmin,
@@ -433,6 +444,7 @@ def CrossFilterSlider(
             "thumb_label": False,
             "tick_labels": False,
         }
+
         # creating slider
         with solara.Row(
             style={"alignItems": "end"},
@@ -440,15 +452,9 @@ def CrossFilterSlider(
         ):
             if issubclass(py_type, (int, np.integer)):
                 solara.InputInt(
-                    label=None,
                     value=filter_value,
                     on_value=set_filter_value,
-                    continuous_update=False,
-                    style={
-                        "max-width": "50px",
-                        "padding-top": "5px",
-                        "padding-bottom": "5px"
-                    }
+                    **input_args
                 )
                 solara.SliderInt(
                     value=filter_value,
@@ -457,15 +463,9 @@ def CrossFilterSlider(
                 )
             elif issubclass(py_type, (float, np.floating)):
                 solara.InputFloat(
-                    label=None,
                     value=filter_value,
                     on_value=set_filter_value,
-                    continuous_update=False,
-                    style={
-                        "max-width": "50px",
-                        "padding-top": "5px",
-                        "padding-bottom": "5px"
-                    }
+                    **input_args
                 )
                 solara.SliderFloat(
                     value=filter_value,
