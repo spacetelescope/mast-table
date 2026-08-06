@@ -670,342 +670,344 @@ def MastTable(table, **kwargs):
     ):
         with solara.Row():
             # creating popout conditions panel
-            if drawer_open:
-                with solara.Card(
-                    style="""
-                    width: 320px !important;
-                    flex-shrink: 0;
-                    overflow-y: auto;
-                    """
+            with solara.Card(
+                style={
+                    "display": "block" if drawer_open else "none",
+                    "width": "320px",
+                    "flex-shrink": "0",
+                    "min-height": "420px",
+                    "max-height": "550px",
+                    "overflow-y": "auto",
+                }
+            ):
+                with solara.Row(
+                    style={
+                        "align-items": "center",
+                        "justify-content": "space-between",
+                        "width": "100%",
+                        "padding": 0,
+                    }
                 ):
+                    solara.Markdown("##Active conditions")
+                    if len(filters) > 1:
+                        solara.Style(
+                            """
+                            .custom-toggle .v-btn {
+                                background-color: transparent# !important;
+                                color: #00627e !important;
+                                height: 40px !important;
+                                width: 50px !important;
+                            }
+
+                            .custom-toggle .v-btn.v-item--active {
+                                background-color: #00627e !important;
+                                color: white !important;
+                            }
+                            """
+                        )
+
+                        solara.ToggleButtonsSingle(
+                            value=pending_reducer,
+                            values=["AND", "OR"],
+                            on_value=set_pending_reducer,
+                            classes=["custom-toggle"],
+                        )
+
+                        solara.Style(
+                            """
+                            .reset-button {
+                                min-width: 0px !important;
+                                width: 40px !important;
+                                height: 40px !important;
+                                padding: 0 !important;
+                            }
+                            """
+                        )
+
+                        with solara.Tooltip("Remove all active filters"):
+                            solara.Button(
+                                icon_name="mdi-refresh",
+                                on_click=lambda *args: (set_filters([]), set_filter_masks({})),
+                                style={"background-color": "#00627e", "color": "white"},
+                                classes=["reset-button"]
+                            )
+
+                # creating slide/select for each active condition
+                for i, f in enumerate(filters):
+                    with solara.Row(style={"width": "100%"}):
+                        solara.Style(
+                            """
+                            .filter-card .v-card {
+                                padding: 0 !important;
+                            }
+
+                            .filter-card .v-card__text {
+                                padding: 4px 8px !important;
+                            }
+
+                            .filter-card .v-card__actions {
+                                padding: 0px 8px !important;
+                            }
+                            """
+                        )
+
+                        with solara.Card(
+                            classes=["filter-card"],
+                            style={
+                                "border": "2px solid #00627e",
+                                "box-shadow": "none",
+                                "width": "100%",
+                            }
+                        ):
+                            opt = slide_or_select(table, f["column"])
+                            initial_val = f["value"] if f.get("value") is not None else None
+
+                            is_expanded = f["id"] in expanded_ids
+
+                            def toggle(filter_id=f["id"]):
+                                ids = set(expanded_ids)
+                                if filter_id in ids:
+                                    ids.remove(filter_id)
+                                else:
+                                    ids.add(filter_id)
+                                set_expanded_ids(ids)
+
+                            with solara.Row(
+                                style={
+                                    "align-items": "center",
+                                    "justify-content": "space-between",
+                                    "width": "100%",
+                                    "padding": 0,
+                                }
+                            ):
+                                solara.Style(
+                                    """
+                                    .v-btn.filter-column {
+                                        text-transform: none !important;
+                                        font-family: inherit !important;
+                                        font-size: inherit !important;
+                                        font-weight: bold !important;
+                                        letter-spacing: normal !important;
+                                    }
+                                    """
+                                )
+
+                                label = f["column"]
+                                if opt == "slider":
+                                    label += " "+f["mode"]
+
+                                solara.Button(
+                                    label=label,
+                                    on_click=toggle,
+                                    text=True,
+                                    classes=["filter-column"],
+                                    style={
+                                        "margin-left": "-8px",
+                                        "justify-content": "flex-start",
+                                        "text-align": "left",
+                                        "padding-left": "8px",
+                                        "padding-right": "8px",
+                                        "min-width": "0",
+                                        "flex-grow": "1",
+                                    },
+                                )
+
+                                with solara.Div():
+                                    RemoveConditionButton(f["id"], remove_filter)
+
+                            with solara.Div(
+                                style={
+                                    "display": "block" if is_expanded else "none"
+                                }
+                            ):
+                                if opt == "slider":
+                                    CrossFilterSlider(
+                                        table,
+                                        f["column"],
+                                        filter_id=f["id"],
+                                        set_mask=set_mask,
+                                        set_filter_mode=lambda new_mode: update_filter_mode(
+                                            f["id"], new_mode
+                                        ),
+                                        mode=f["mode"],
+                                        initial_value=initial_val,
+                                    )
+                                else:
+                                    other_masks = [
+                                        mask
+                                        for fid, mask in filter_masks.items()
+                                        if fid != f["id"] and mask is not None
+                                    ]
+
+                                    if not other_masks:
+                                        table_filtered = table
+                                    elif pending_reducer == "AND":
+                                        table_filtered = table[
+                                            functools.reduce(
+                                                operator.and_,
+                                                other_masks
+                                            )
+                                        ]
+                                    else:
+                                        table_filtered = table[
+                                            functools.reduce(
+                                                operator.or_,
+                                                other_masks
+                                            )
+                                        ]
+
+                                    CrossFilterSelect(
+                                        table,
+                                        f["column"],
+                                        filter_id=f["id"],
+                                        set_mask=set_mask,
+                                        initial_values=initial_val,
+                                        table_filtered=table_filtered
+                                    )
+
+                if not len(filters):
+                    solara.Markdown("No active conditions")
+
+                # creating add condition section
+                solara.Markdown("##Add condition")
+
+                column_names = table.colnames
+                column_names.sort(key=str.casefold)
+                if col_unique_row_index in column_names:
+                    # never give the internal unique column as an option
+                    column_names.remove(col_unique_row_index)
+
+                v.Autocomplete(
+                    label="Column",
+                    items=column_names,
+                    v_model=pending_column,
+                    on_v_model=set_pending_column,
+                )
+
+                opt = slide_or_select(table, pending_column)
+                fully_masked = False
+
+                # creating slide/select based on column user selects
+                if opt == "slider":
                     with solara.Row(
                         style={
                             "align-items": "center",
-                            "justify-content": "space-between",
-                            "width": "100%",
-                            "padding": 0,
+                            "gap": "8px",
+                            "flex-wrap": "wrap",
                         }
                     ):
-                        solara.Markdown("##Active conditions")
-                        if len(filters) > 1:
-                            solara.Style(
-                                """
-                                .custom-toggle .v-btn {
-                                    background-color: transparent# !important;
-                                    color: #00627e !important;
-                                    height: 40px !important;
-                                    width: 50px !important;
-                                }
+                        solara.Markdown("Operator")
 
-                                .custom-toggle .v-btn.v-item--active {
-                                    background-color: #00627e !important;
-                                    color: white !important;
-                                }
-                                """
-                            )
+                        FilterModeButtons(
+                            mode=pending_mode,
+                            set_mode=set_pending_mode,
+                        )
 
-                            solara.ToggleButtonsSingle(
-                                value=pending_reducer,
-                                values=["AND", "OR"],
-                                on_value=set_pending_reducer,
-                                classes=["custom-toggle"],
-                            )
+                    vmin, vmax = table_range(table, pending_column)
 
-                            solara.Style(
-                                """
-                                .reset-button {
-                                        min-width: 0px !important;
-                                    width: 40px !important;
-                                    height: 40px !important;
-                                    padding: 0 !important;
-                                    }
-                                """
-                            )
+                    py_type = num_py_type(table, pending_column)
 
-                            with solara.Tooltip("Remove all active filters"):
-                                solara.Button(
-                                    icon_name="mdi-refresh",
-                                    on_click=lambda *args: (set_filters([]), set_filter_masks({})),
-                                    style={"background-color": "#00627e", "color": "white"},
-                                    classes=["reset-button"]
-                                )
+                    if pending_value in ("", None):
+                        pending_value = vmin
 
-                    # creating slide/select for each active condition
-                    for i, f in enumerate(filters):
-                        with solara.Row(style={"width": "100%"}):
-                            solara.Style(
-                                """
-                                .filter-card .v-card {
-                                    padding: 0 !important;
-                                }
+                    label = f"Condition {pending_mode} {pending_value}"
+                    solara.Markdown(label)
 
-                                .filter-card .v-card__text {
-                                    padding: 4px 8px !important;
-                                }
+                    table_filtered = table[
+                        combined_mask
+                    ] if combined_mask is not None else table
+                    comparison = operator_map[pending_mode]
+                    slider_mask = comparison(table_filtered[pending_column], pending_value)
 
-                                .filter-card .v-card__actions {
-                                    padding: 0px 8px !important;
-                                }
-                                """
-                            )
+                    if issubclass(py_type, (int, np.integer)):
+                        solara.SliderInt(
+                            label="",
+                            value=int(pending_value),
+                            min=int(vmin),
+                            max=int(vmax),
+                            step=step_size(vmin, vmax),
+                            on_value=set_pending_value,
+                            thumb_label=False,
+                            tick_labels=False,
+                        )
 
-                            with solara.Card(
-                                classes=["filter-card"],
-                                style={
-                                    "border": "2px solid #00627e",
-                                    "box-shadow": "none",
-                                    "width": "100%",
-                                }
-                            ):
-                                opt = slide_or_select(table, f["column"])
-                                initial_val = f["value"] if f.get("value") is not None else None
+                    elif issubclass(py_type, (float, np.floating)):
+                        solara.SliderFloat(
+                            label="",
+                            value=float(pending_value),
+                            min=float(vmin),
+                            max=float(vmax),
+                            step=step_size(vmin, vmax),
+                            on_value=set_pending_value,
+                            thumb_label=False,
+                            tick_labels=False,
+                        )
 
-                                is_expanded = f["id"] in expanded_ids
-
-                                def toggle(filter_id=f["id"]):
-                                    ids = set(expanded_ids)
-                                    if filter_id in ids:
-                                        ids.remove(filter_id)
-                                    else:
-                                        ids.add(filter_id)
-                                    set_expanded_ids(ids)
-
-                                with solara.Row(
-                                    style={
-                                        "align-items": "center",
-                                        "justify-content": "space-between",
-                                        "width": "100%",
-                                        "padding": 0,
-                                    }
-                                ):
-                                    solara.Style(
-                                        """
-                                        .v-btn.filter-column {
-                                            text-transform: none !important;
-                                            font-family: inherit !important;
-                                            font-size: inherit !important;
-                                            font-weight: bold !important;
-                                            letter-spacing: normal !important;
-                                        }
-                                        """
-                                    )
-
-                                    label = f["column"]
-                                    if opt == "slider":
-                                        label += " "+f["mode"]
-
-                                    solara.Button(
-                                        label=label,
-                                        on_click=toggle,
-                                        text=True,
-                                        classes=["filter-column"],
-                                        style={
-                                            "margin-left": "-8px",
-                                            "justify-content": "flex-start",
-                                            "text-align": "left",
-                                            "padding-left": "8px",
-                                            "padding-right": "8px",
-                                            "min-width": "0",
-                                            "flex-grow": "1",
-                                        },
-                                    )
-
-                                    with solara.Div():
-                                        RemoveConditionButton(f["id"], remove_filter)
-
-                                with solara.Div(
-                                    style={
-                                        "display": "block" if is_expanded else "none"
-                                    }
-                                ):
-                                    if opt == "slider":
-                                        CrossFilterSlider(
-                                            table,
-                                            f["column"],
-                                            filter_id=f["id"],
-                                            set_mask=set_mask,
-                                            set_filter_mode=lambda new_mode: update_filter_mode(
-                                                f["id"], new_mode
-                                            ),
-                                            mode=f["mode"],
-                                            initial_value=initial_val,
-                                        )
-                                    else:
-                                        other_masks = [
-                                            mask
-                                            for fid, mask in filter_masks.items()
-                                            if fid != f["id"] and mask is not None
-                                        ]
-
-                                        if not other_masks:
-                                            table_filtered = table
-                                        elif pending_reducer == "AND":
-                                            table_filtered = table[
-                                                functools.reduce(
-                                                    operator.and_,
-                                                    other_masks
-                                                )
-                                            ]
-                                        else:
-                                            table_filtered = table[
-                                                functools.reduce(
-                                                    operator.or_,
-                                                    other_masks
-                                                )
-                                            ]
-
-                                        CrossFilterSelect(
-                                            table,
-                                            f["column"],
-                                            filter_id=f["id"],
-                                            set_mask=set_mask,
-                                            initial_values=initial_val,
-                                            table_filtered=table_filtered
-                                        )
-
-                    if not len(filters):
-                        solara.Markdown("No active conditions")
-
-                    # creating add condition section
-                    solara.Markdown("##Add condition")
-
-                    column_names = table.colnames
-                    column_names.sort(key=str.casefold)
-                    if col_unique_row_index in column_names:
-                        # never give the internal unique column as an option
-                        column_names.remove(col_unique_row_index)
-
-                    v.Autocomplete(
-                        label="Column",
-                        items=column_names,
-                        v_model=pending_column,
-                        on_v_model=set_pending_column,
+                    solara.Markdown(
+                        (
+                            f"<div style='font-size: 12px; text-align: right;'>"
+                            f"{len(table_filtered[slider_mask])} of {len(table_filtered)} "
+                            "after filtering</div>"
+                        )
+                    )
+                else:
+                    unique_values, fully_masked = build_select_items(
+                        table[pending_column]
                     )
 
-                    opt = slide_or_select(table, pending_column)
-                    fully_masked = False
+                    table_filtered = table[combined_mask] if combined_mask is not None else None
 
-                    # creating slide/select based on column user selects
-                    if opt == "slider":
-                        with solara.Row(
-                            style={
-                                "align-items": "center",
-                                "gap": "8px",
-                                "flex-wrap": "wrap",
-                            }
-                        ):
-                            solara.Markdown("Operator")
+                    max_unique = 100
 
-                            FilterModeButtons(
-                                mode=pending_mode,
-                                set_mode=set_pending_mode,
-                            )
+                    items, value_counts = build_select_filter_preview(
+                        table,
+                        pending_column,
+                        max_unique=max_unique,
+                        table_filtered=table_filtered,
+                    )
 
-                        vmin, vmax = table_range(table, pending_column)
+                    value = (
+                        {"value": pending_value}
+                        if pending_value not in ("", None)
+                        else {"value": unique_values[0]}
+                        if unique_values
+                        else None
+                    )
 
-                        py_type = num_py_type(table, pending_column)
+                    def set_pending_select_value(selection):
+                        if selection is None:
+                            set_pending_value("")
+                        else:
+                            set_pending_value(selection["value"])
 
-                        if pending_value in ("", None):
-                            pending_value = vmin
+                    Select.element(
+                        value=value,
+                        items=items,
+                        on_value=set_pending_select_value,
+                        label="Value",
+                        clearable=False,
+                        return_object=True,
+                        multiple=False,
+                        filtered=pending_value is not None,
+                        count=len(table_filtered) if table_filtered is not None else len(table),
+                        messages=(
+                            f"Too many unique values, will only show the first {max_unique}"
+                            if len(value_counts) > max_unique else ""
+                        ),
+                        class_="solara-cross-filter-select",
+                    )
 
-                        label = f"Condition {pending_mode} {pending_value}"
-                        solara.Markdown(label)
-
-                        table_filtered = table[
-                            combined_mask
-                        ] if combined_mask is not None else table
-                        comparison = operator_map[pending_mode]
-                        slider_mask = comparison(table_filtered[pending_column], pending_value)
-
-                        if issubclass(py_type, (int, np.integer)):
-                            solara.SliderInt(
-                                label="",
-                                value=int(pending_value),
-                                min=int(vmin),
-                                max=int(vmax),
-                                step=step_size(vmin, vmax),
-                                on_value=set_pending_value,
-                                thumb_label=False,
-                                tick_labels=False,
-                            )
-
-                        elif issubclass(py_type, (float, np.floating)):
-                            solara.SliderFloat(
-                                label="",
-                                value=float(pending_value),
-                                min=float(vmin),
-                                max=float(vmax),
-                                step=step_size(vmin, vmax),
-                                on_value=set_pending_value,
-                                thumb_label=False,
-                                tick_labels=False,
-                            )
-
-                        solara.Markdown(
-                            (
-                                f"<div style='font-size: 12px; text-align: right;'>"
-                                f"{len(table_filtered[slider_mask])} of {len(table_filtered)} "
-                                "after filtering</div>"
-                            )
-                        )
-                    else:
-                        unique_values, fully_masked = build_select_items(
-                            table[pending_column]
-                        )
-
-                        table_filtered = table[combined_mask] if combined_mask is not None else None
-
-                        max_unique = 100
-
-                        items, value_counts = build_select_filter_preview(
-                            table,
-                            pending_column,
-                            max_unique=max_unique,
-                            table_filtered=table_filtered,
-                        )
-
-                        value = (
-                            {"value": pending_value}
-                            if pending_value not in ("", None)
-                            else {"value": unique_values[0]}
-                            if unique_values
-                            else None
-                        )
-
-                        def set_pending_select_value(selection):
-                            if selection is None:
-                                set_pending_value("")
-                            else:
-                                set_pending_value(selection["value"])
-
-                        Select.element(
-                            value=value,
-                            items=items,
-                            on_value=set_pending_select_value,
-                            label="Value",
-                            clearable=False,
-                            return_object=True,
-                            multiple=False,
-                            filtered=pending_value is not None,
-                            count=len(table_filtered) if table_filtered is not None else len(table),
-                            messages=(
-                                f"Too many unique values, will only show the first {max_unique}"
-                                if len(value_counts) > max_unique else ""
-                            ),
-                            class_="solara-cross-filter-select",
-                        )
-
+                with solara.Row(justify="end"):
+                    solara.Button(
+                        label="Apply condition",
+                        icon_name="mdi-plus",
+                        on_click=lambda *args: add_filter(),
+                        disabled=fully_masked,
+                        style={"background-color": "#00627e", "color": "white"}
+                    )
+                if fully_masked:
                     with solara.Row(justify="end"):
-                        solara.Button(
-                            label="Apply condition",
-                            icon_name="mdi-plus",
-                            on_click=lambda *args: add_filter(),
-                            disabled=fully_masked,
-                            style={"background-color": "#00627e", "color": "white"}
-                        )
-                    if fully_masked:
-                        with solara.Row(justify="end"):
-                            solara.Markdown("(Column fully masked)")
+                        solara.Markdown("(Column fully masked)")
 
             with solara.Column(style="flex: 1; overflow: auto; min-height: 0"):
                 filtered_table = (
