@@ -678,28 +678,57 @@ def MastTable(table, **kwargs):
                     overflow-y: auto;
                     """
                 ):
-                    with solara.Row():
+                    with solara.Row(
+                        style={
+                            "align-items": "center",
+                            "justify-content": "space-between",
+                            "width": "100%",
+                            "padding": 0,
+                        }
+                    ):
                         solara.Markdown("##Active conditions")
-                        solara.Style(
-                            """
-                            .custom-toggle .v-btn {
-                                background-color: transparent# !important;
-                                color: #00627e !important;
-                            }
+                        if len(filters) > 1:
+                            solara.Style(
+                                """
+                                .custom-toggle .v-btn {
+                                    background-color: transparent# !important;
+                                    color: #00627e !important;
+                                    height: 40px !important;
+                                    width: 50px !important;
+                                }
 
-                            .custom-toggle .v-btn.v-item--active {
-                                background-color: #00627e !important;
-                                color: white !important;
-                            }
-                            """
-                        )
+                                .custom-toggle .v-btn.v-item--active {
+                                    background-color: #00627e !important;
+                                    color: white !important;
+                                }
+                                """
+                            )
 
-                        solara.ToggleButtonsSingle(
-                            value=pending_reducer,
-                            values=["AND", "OR"],
-                            on_value=set_pending_reducer,
-                            classes=["custom-toggle"],
-                        )
+                            solara.ToggleButtonsSingle(
+                                value=pending_reducer,
+                                values=["AND", "OR"],
+                                on_value=set_pending_reducer,
+                                classes=["custom-toggle"],
+                            )
+
+                            solara.Style(
+                                """
+                                .reset-button {
+                                        min-width: 0px !important;
+                                    width: 40px !important;
+                                    height: 40px !important;
+                                    padding: 0 !important;
+                                    }
+                                """
+                            )
+
+                            with solara.Tooltip("Remove all active filters"):
+                                solara.Button(
+                                    icon_name="mdi-refresh",
+                                    on_click=lambda *args: (set_filters([]), set_filter_masks({})),
+                                    style={"background-color": "#00627e", "color": "white"},
+                                    classes=["reset-button"]
+                                )
 
                     # creating slide/select for each active condition
                     for i, f in enumerate(filters):
