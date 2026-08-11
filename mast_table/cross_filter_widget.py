@@ -148,11 +148,13 @@ def CrossFilterSelect(
     column: str,
     filter_id: str,
     set_mask: Callable,
+    set_filter_mode: Callable,
     table_filtered: Table,
     initial_values=None,
     max_unique: int = 100,
     multiple: bool = False,
     invert: bool = False,
+    mode: str = "==",
     configurable: bool = True,
     classes: List[str] = [],
 ):
@@ -184,6 +186,10 @@ def CrossFilterSelect(
     )
     invert, set_invert = solara.use_state_or_update(invert)
     multiple, set_multiple = solara.use_state_or_update(multiple)
+
+    def update_mode(new_invert):
+        set_invert(new_invert)
+        set_filter_mode("!=" if new_invert else "==")
 
     def clear_not_multiple():
         if not multiple and len(filter_values) > 1:
@@ -318,14 +324,11 @@ def CrossFilterSelect(
 
             else:
                 # creating selection dropdown
-                label = (
-                    "Condition = " if not invert else "Condition != "
-                )
                 Select.element(
                     value=value,
                     items=items,
                     on_value=set_values_and_filter,
-                    label=label,
+                    label="",
                     clearable=False,
                     return_object=True,
                     multiple=multiple,
@@ -342,7 +345,7 @@ def CrossFilterSelect(
                 if configurable:
                     SettingsMenu(
                         invert,
-                        set_invert,
+                        update_mode,
                         multiple=multiple,
                         set_multiple=set_multiple
                     )
@@ -594,13 +597,13 @@ def MastTable(table, **kwargs):
     filters, set_filters = solara.use_state([])
     drawer_open, set_drawer_open = solara.use_state(True)
 
-    def add_filter():
+    def add_filter(opt):
         new_filters = filters + [
             {
                 "id": str(uuid.uuid4()),
                 "column": pending_column,
                 "value": pending_value,
-                "mode": pending_mode
+                "mode": pending_mode if opt == "slider" else "==",
             }
         ]
         set_filters(new_filters)
@@ -792,13 +795,15 @@ def MastTable(table, **kwargs):
                                     """
                                 )
 
-                                label = f["column"]
-                                if opt == "slider":
-                                    label += " "+f["mode"]
+                                label = f'{f["column"]} {f["mode"]}'
 
                                 solara.Button(
                                     label=label,
                                     on_click=toggle,
+                                    icon_name=(
+                                        "mdi-chevron-up" if is_expanded
+                                        else "mdi-chevron-down"
+                                    ),
                                     text=True,
                                     classes=["filter-column"],
                                     style={
@@ -820,15 +825,18 @@ def MastTable(table, **kwargs):
                                     "display": "block" if is_expanded else "none"
                                 }
                             ):
+                                filter_id = f["id"]
+
+                                def on_mode_change(new_mode, filter_id=filter_id):
+                                    update_filter_mode(filter_id, new_mode)
+
                                 if opt == "slider":
                                     CrossFilterSlider(
                                         table,
                                         f["column"],
-                                        filter_id=f["id"],
+                                        filter_id=filter_id,
                                         set_mask=set_mask,
-                                        set_filter_mode=lambda new_mode: update_filter_mode(
-                                            f["id"], new_mode
-                                        ),
+                                        set_filter_mode=on_mode_change,
                                         mode=f["mode"],
                                         initial_value=initial_val,
                                     )
@@ -836,7 +844,7 @@ def MastTable(table, **kwargs):
                                     other_masks = [
                                         mask
                                         for fid, mask in filter_masks.items()
-                                        if fid != f["id"] and mask is not None
+                                        if fid != filter_id and mask is not None
                                     ]
 
                                     if not other_masks:
@@ -859,8 +867,9 @@ def MastTable(table, **kwargs):
                                     CrossFilterSelect(
                                         table,
                                         f["column"],
-                                        filter_id=f["id"],
+                                        filter_id=filter_id,
                                         set_mask=set_mask,
+                                        set_filter_mode=on_mode_change,
                                         initial_values=initial_val,
                                         table_filtered=table_filtered
                                     )
@@ -1001,7 +1010,7 @@ def MastTable(table, **kwargs):
                     solara.Button(
                         label="Apply condition",
                         icon_name="mdi-plus",
-                        on_click=lambda *args: add_filter(),
+                        on_click=lambda *args: add_filter(opt),
                         disabled=fully_masked,
                         style={"background-color": "#00627e", "color": "white"}
                     )
