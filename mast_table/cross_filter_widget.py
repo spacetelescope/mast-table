@@ -140,10 +140,10 @@ def RemoveConditionButton(
     solara.Style(
         """
         .close-button {
-            min-width: 10px !important;
-            width: 30px !important;
-            height: 30px !important;
-            padding: 0 !important;
+            min-width: 10px;
+            width: 30px;
+            height: 30px;
+            padding: 0;
         }
         """
     )
@@ -267,16 +267,16 @@ def CrossFilterSelect(
                 solara.Style(
                     """
                     .compact-checkboxes .v-selection-control {
-                        min-height: 24px !important;
-                        padding: 0 !important;
+                        min-height: 24px;
+                        padding: 0;
                     }
 
                     .compact-checkboxes .v-selection-control__wrapper {
-                        height: 24px !important;
+                        height: 24px;
                     }
 
                     .compact-checkboxes .v-label {
-                        margin: 0 !important;
+                        margin: 0;
                     }
                     """
                 )
@@ -701,28 +701,28 @@ def MastTableView(table, base_mast_table):
                         solara.Style(
                             """
                             .custom-toggle {
-                                display: flex !important;
-                                flex: 0 0 auto !important;
-                                width: 100px !important;
-                                min-width: 100px !important;
-                                overflow: hidden !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
+                                display: flex;
+                                flex: 0 0 auto;
+                                width: 100px;
+                                min-width: 100px;
+                                overflow: hidden;
+                                margin: 0;
+                                padding: 0;
                             }
                             .custom-toggle .v-btn {
-                                background-color: #F2F2F2 !important;
-                                color: #00627e !important;
-                                height: 40px !important;
-                                width: 50px !important;
-                                min-width: 50px !important;
-                                max-width: 50px !important;
-                                flex: 0 0 50px !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
+                                background-color: #F2F2F2;
+                                color: #00627e;
+                                height: 40px;
+                                width: 50px;
+                                min-width: 50px;
+                                max-width: 50px;
+                                flex: 0 0 50px;
+                                margin: 0;
+                                padding: 0;
                             }
                             .custom-toggle .v-btn--active {
-                                background-color: #00627e !important;
-                                color: white !important;
+                                background-color: #00627e;
+                                color: white;
                             }
                             """
                         )
@@ -737,10 +737,10 @@ def MastTableView(table, base_mast_table):
                         solara.Style(
                             """
                             .reset-button {
-                                min-width: 0px !important;
-                                width: 40px !important;
-                                height: 40px !important;
-                                padding: 0 !important;
+                                min-width: 0px;
+                                width: 40px;
+                                height: 40px;
+                                padding: 0;
                                 transform: translateY(-4px);
                             }
                             """
@@ -760,13 +760,13 @@ def MastTableView(table, base_mast_table):
                         solara.Style(
                             """
                             .filter-card .v-card {
-                                padding: 0 !important;
+                                padding: 0;
                             }
                             .filter-card .v-card-text {
-                                padding: 4px 8px !important;
+                                padding: 4px 8px;
                             }
                             .filter-card .v-card-actions {
-                                padding: 0px 8px !important;
+                                padding: 0px 8px;
                             }
                             """
                         )
@@ -803,15 +803,23 @@ def MastTableView(table, base_mast_table):
                                 solara.Style(
                                     """
                                     .v-btn.filter-column {
-                                        text-transform: none !important;
-                                        font-family: inherit !important;
-                                        font-size: inherit !important;
-                                        font-weight: bold !important;
-                                        letter-spacing: normal !important;
+                                        text-transform: none;
+                                        font-family: inherit;
+                                        font-size: inherit;
+                                        font-weight: bold;
+                                        letter-spacing: normal;
                                     }
                                     .filter-column {
-                                        min-width: 0 !important;
-                                        flex: 1 1 auto !important;
+                                        min-width: 0;
+                                        flex: 1 1 auto;
+                                    }
+                                    .filter-column .v-btn__content {
+                                        min-width: 0;
+                                        max-width: 100%;
+                                        overflow-x: auto;
+                                        overflow-y: hidden;
+                                        white-space: nowrap;
+                                        display: block;
                                     }
                                     """
                                 )

@@ -191,11 +191,11 @@
 
 /* header */
 :deep(.base-mast-data-table thead) {
-  background-color: light-dark(#b4dbe9, #013b4d) !important;
+  background-color: light-dark(#b4dbe9, #013b4d);
 }
 :deep(.base-mast-data-table thead th) {
-  background-color: light-dark(#b4dbe9, #013b4d) !important;
-  color: light-dark(black, white) !important;
+  background-color: light-dark(#b4dbe9, #013b4d);
+  color: light-dark(black, white);
 }
 
 /* sortable column icons */
@@ -222,122 +222,122 @@
 
 /* alternating rows */
 :deep(.base-mast-data-table .v-data-table__tr:nth-child(even)) {
-  background: #f1f2f7 !important;
+  background: #f1f2f7;
 }
 :deep(.base-mast-data-table .v-data-table__tr:nth-child(odd)) {
-  background: white !important;
+  background: white;
 }
 
 /* selected */
 :deep(.base-mast-data-table tbody tr:has(.v-selection-control--dirty)) td {
-  background-color: #bdf0fd !important;
-  color: black !important;
+  background-color: #bdf0fd;
+  color: black;
 }
 
 /* footer */
 :deep(.base-mast-data-table .v-data-table-footer) {
-  background-color: light-dark(#b4dbe9, #013b4d) !important;
-  color: black !important;
+  background-color: light-dark(#b4dbe9, #013b4d);
+  color: black;
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-field) {
-  background-color: light-dark(#b4dbe9, #013b4d) !important;
+  background-color: light-dark(#b4dbe9, #013b4d);
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-field__input),
 :deep(.base-mast-data-table .v-data-table-footer .v-label) {
-  color: black !important;
+  color: black;
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-btn) {
-  color: black !important;
+  color: black;
 }
 :deep(.base-mast-data-table .v-data-table-footer .items-per-page-options) {
-  color: black !important;
+  color: black;
 }
 
 /* reducing whitespace between rows */
 /* compact body rows */
 :deep(.base-mast-data-table tbody .v-data-table__td) {
-  white-space: nowrap !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  height: 24px !important;
-  line-height: 1 !important;
+  white-space: nowrap;
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 24px;
+  line-height: 1;
 }
 /* make selection control fit the row */
 :deep(.base-mast-data-table tbody .v-selection-control) {
-  min-height: 24px !important;
-  height: 24px !important;
+  min-height: 24px;
+  height: 24px;
 }
 :deep(.base-mast-data-table tbody .v-selection-control__wrapper) {
-  height: 24px !important;
-  width: 24px !important;
+  height: 24px;
+  width: 24px;
 }
 /* don't let checkbox's internal input create extra space */
 :deep(.base-mast-data-table tbody .v-selection-control__input) {
-  height: 24px !important;
-  width: 24px !important;
+  height: 24px;
+  width: 24px;
 }
 
 /* reducing footer whitespace */
 /* compact table footer */
 :deep(.base-mast-data-table .v-data-table-footer) {
-  min-height: 45px !important;
-  height: 45px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  min-height: 45px;
+  height: 45px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 /* compact items-per-page select */
 :deep(.base-mast-data-table .v-data-table-footer .v-field) {
-  min-height: 28px !important;
-  height: 28px !important;
+  min-height: 28px;
+  height: 28px;
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-field__input) {
-  min-height: 28px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  min-height: 28px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-select) {
-  height: 28px !important;
+  height: 28px;
 }
 
 /* select/clear columns */
 .select-all-item {
-  min-height: 36px !important;
-  padding: 0 20px !important;
+  min-height: 36px;
+  padding: 0 20px;
 }
 
 </style>
 
 <style>
 .base-mast-column-menu .v-list {
-  padding: 4px 0 !important;
+  padding: 4px 0;
 }
 
 .base-mast-column-menu .v-list-item {
-  min-height: 32px !important;
-  height: 32px !important;
-  padding: 0 12px !important;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 12px;
 }
 
 .base-mast-column-menu .v-list-item__content {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .base-mast-column-menu .v-list-item__prepend {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .base-mast-column-menu .v-list-item__append {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .base-mast-column-menu .v-list-item__spacer {
-  width: 8px !important;
+  width: 8px;
 }
 
 .base-mast-column-menu .select-all-item {
-  min-height: 32px !important;
-  height: 32px !important;
-  padding: 0 20px !important;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 20px;
 }
 
 .base-mast-column-menu .select-all-content {
@@ -350,26 +350,26 @@
 
 /* open-in buttons */
 .open-in {
-  background-color: light-dark(#b4dbe8, #00617e) !important;
-  margin-left: 0.5em !important;
+  background-color: light-dark(#b4dbe8, #00617e);
+  margin-left: 0.5em;
   width: 7em;
 }
 .open-in:not(:disabled):hover {
-  background-color: light-dark(#b4dbe8, #00617e) !important;
-  color: light-dark(black, white) !important;
+  background-color: light-dark(#b4dbe8, #00617e);
+  color: light-dark(black, white);
 }
 .open-in:disabled {
-  background-color: light-dark(#e0e0e0, #424242) !important;
-  color: light-dark(black, white) !important;
-  opacity: 0.6 !important;
+  background-color: light-dark(#e0e0e0, #424242);
+  color: light-dark(black, white);
+  opacity: 0.6;
 }
 
 /* defintions toggle menu */
 .base-mast-settings-menu {
-  padding: 8px 12px !important;
-  overflow: visible !important;
+  padding: 8px 12px;
+  overflow: visible;
 }
 .base-mast-settings-menu .v-switch {
-  overflow: visible !important;
+  overflow: visible;
 }
 </style>

@@ -30,6 +30,7 @@ export default {
     padding: 4px 8px;
     font-size: 16px;
     line-height: 20px;
+    overflow-y: "auto";
 }
 .crossfilter-input::-webkit-inner-spin-button, 
 .crossfilter-input::-webkit-outer-spin-button {
@@ -41,8 +42,8 @@ export default {
 .crossfilter-input:focus,
 .crossfilter-input:focus-visible,
 .crossfilter-input:active {
-    outline: none !important;
-    border-color: none !important;
-    box-shadow: none !important;
+    outline: none;
+    border-color: none;
+    box-shadow: none;
 }
 </style>

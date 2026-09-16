@@ -9,4 +9,3 @@ class Input(VuetifyTemplate):
     min = traitlets.Float().tag(sync=True)
     max = traitlets.Float().tag(sync=True)
     step = traitlets.Float().tag(sync=True)
-    continuous_update = traitlets.Bool(True).tag(sync=True)
