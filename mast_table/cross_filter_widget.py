@@ -249,16 +249,16 @@ def CrossFilterSelect(
 
     solara.use_memo(update_filter, dependencies=[filter_values, invert])
 
-    value = (
-        [item for item in items if item["value"] in filter_values] if multiple
-        else (
-            next(
+    if multiple:
+        value = [item for item in items if item["value"] in filter_values]
+    else:
+        if filter_values:
+            value = next(
                 (item for item in items if item["value"] == filter_values[0]),
                 None,
             )
-            if filter_values else None
-        )
-    )
+        else:
+            value = None
 
     with solara.VBox(classes=classes) as main:
         with solara.Column():
@@ -473,7 +473,7 @@ def SelectableTable(
     table,
     base_mast_table,
     on_selected_indices: Optional[Callable[[List[int]], None]] = None,
-    drawer_open: bool = True,
+    drawer_open: bool = False,
     set_drawer_open=None
 ):
     """An ipyvuetify DataTable with checkbox selection.
@@ -535,7 +535,7 @@ def SelectableTable(
         [base_mast_table],
     )
 
-    # updating basemasttable items on filter changes
+    # updating BaseMastTable items on filter changes
     solara.use_effect(
         lambda: base_mast_table.update_items(table),
         [table],
@@ -568,7 +568,7 @@ def MastTableView(table, base_mast_table):
     pending_reducer, set_pending_reducer = solara.use_state("AND")
     filter_masks, set_filter_masks = solara.use_state({})
     filters, set_filters = solara.use_state([])
-    drawer_open, set_drawer_open = solara.use_state(True)
+    drawer_open, set_drawer_open = solara.use_state(False)
 
     # get defaults for "add condition", establish pending accordingly
     default_column = table.colnames[0]
@@ -755,7 +755,7 @@ def MastTableView(table, base_mast_table):
                             )
 
                 # creating slide/select for each active condition
-                for _, f in enumerate(filters):
+                for f in filters:
                     with solara.Row(style={"width": "100%"}):
                         solara.Style(
                             """
@@ -966,7 +966,7 @@ def MastTableView(table, base_mast_table):
                     vmin, vmax = table_range(table, pending_column)
 
                     solara.Text(
-                        f"Condition {pending_mode} {pending_value}",
+                        f"{pending_column} {pending_mode} {pending_value}",
                         style={"margin": "0", "padding": "0"},
                     )
 
@@ -1027,10 +1027,13 @@ def MastTableView(table, base_mast_table):
                         table_filtered=table_filtered,
                     )
 
-                    value = next(
-                        (item for item in items if item["value"] == pending_value),
-                        None,
-                    ) if pending_value not in ("", None) else None
+                    if pending_value not in ("", None):
+                        value = next(
+                            (item for item in items if item["value"] == pending_value),
+                            None,
+                        )
+                    else:
+                        value = None
 
                     def set_pending_select_value(selection):
                         if selection is None:

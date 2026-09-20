@@ -105,7 +105,7 @@ class BaseMastTable(VuetifyTemplate):
     menu_open = Bool(False).tag(sync=True)
     enable_load_in_app = Bool(False).tag(sync=True)
     mission = Unicode(allow_none=True).tag(sync=True)
-    filter_tray_open = Bool(True).tag(sync=True)
+    filter_tray_open = Bool(False).tag(sync=True)
     # pagination traitlets
     items_per_page = Int(10).tag(sync=True)
     server_pagination = Bool(True).tag(sync=True)
@@ -190,7 +190,7 @@ class BaseMastTable(VuetifyTemplate):
             self._set_item_key(columns, unique_column)
 
         # headers_avail excludes the unique row index column, and headers_visible
-        # defaults to exclude the `s_region` column (can be selected to dislay in UI)
+        # defaults to exclude the `s_region` column (can be undone in the UI)
         self.headers_avail = [
             column for column in columns if column != col_unique_row_index
         ]
@@ -204,7 +204,7 @@ class BaseMastTable(VuetifyTemplate):
             self.column_descriptions = validate.get_column_descriptions(mission, table)
 
             # if the user hasn't defined the ra/dec columns, use
-            # the expectated MastMissions names for this mission:
+            # the expected MastMissions names for this mission:
             if ra_column is None and dec_column is None:
                 ra_column, dec_column = mission_mast_ra_dec_colnames[mission]
 

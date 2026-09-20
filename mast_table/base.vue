@@ -2,7 +2,7 @@
   <v-container fluid class="base-mast-table">
     <div class="base-mast-table-toolbar">
       <v-btn
-        :color="filter_tray_open ? '#b4dbe9' : undefined"
+        :color="filter_tray_open ? undefined : '#b4dbe9'"
         @click="filter_tray_open = !filter_tray_open"
       >
         {{ filter_tray_open ? 'Hide Conditions' : 'Show Conditions' }}
