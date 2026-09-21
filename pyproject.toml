@@ -1,7 +1,7 @@
 [project]
 name = "mast-table"
 description = "Interact with MAST data products in a table"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 authors = [
     { name = "mast-table developers" },
 ]
@@ -9,9 +9,9 @@ dependencies = [
     "astroquery",
     "traitlets",
     "ipypopout",
-    "ipyvuetify == v1.11.3",
+    "ipyvuetify >= v3.0.0",
     "ipywidgets",
-    "solara",
+    "solara >= v1.61.0",
 ]
 dynamic = [
     "version",
@@ -20,7 +20,7 @@ dynamic = [
 [project.optional-dependencies]
 test = [
     "pytest",
-    "jdaviz"
+    "jdaviz @ git+https://github.com/spacetelescope/jdaviz.git@main",
 ]
 docs = [
     "sphinx-astropy[confv2]>=1.9.1",
