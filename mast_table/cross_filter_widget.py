@@ -7,6 +7,7 @@ import uuid
 
 from IPython.display import display
 from ipypopout import PopoutButton
+from sidecar import Sidecar
 
 import solara
 import reacton.ipyvuetify as v
@@ -1181,6 +1182,49 @@ class MastTable:
                 base_mast_table=self.widget,
             )
         )
+
+    def show(self, loc="inline", title="MastTable"):
+        """
+        Display the mast-table.
+
+        Parameters
+        ----------
+        loc : str, optional (default "inline")
+            Location to display the MastTable. Supported locations:
+                "inline": Displays the MastTable inline in a notebook.
+                "sidecar": Displays the MastTable in a separate JupyterLab window from the
+                    notebook, with location decided by 'anchor'. Anchor options available from
+                    ``jupyterlab-sidecar`` include:
+                        {'split-right', 'split-left', 'split-top', 'split-bottom', 'tab-before',
+                         'tab-after', 'right'}
+                    Example loc for a sidecar at the bottom is `loc='sidecar:split-bottom'`.
+
+        title : str, optional (default "MastTable")
+            The title of the sidecar tab, only applicable to a "sidecar" display.
+
+        """
+        valid_anchors = [
+            "split-right", "split-left", "split-top", "split-bottom",
+            "tab-before", "tab-after", "right", None
+        ]
+
+        if type(loc) is not str:
+            raise ValueError("Invalid loc provided. Must be a string.")
+
+        if loc == "inline":
+            self._ipython_display_()
+        elif loc.startswith("sidecar"):
+            anchor = None if loc == "sidecar" else loc.split(":")[-1]
+
+            if anchor not in valid_anchors:
+                raise ValueError(
+                    "Invalid anchor provided. Must be one of the available from "
+                    "``jupyterlab-sidecar``. Valid anchors include: "
+                    f"{valid_anchors[:-1]}")
+
+            sc = Sidecar(title=title, anchor=anchor)
+            with sc:
+                self._ipython_display_()
 
 
 def get_current_table():
