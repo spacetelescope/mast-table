@@ -6,6 +6,7 @@ import functools
 import uuid
 
 from IPython.display import display
+from ipypopout import PopoutButton
 
 import solara
 import reacton.ipyvuetify as v
@@ -663,12 +664,23 @@ def MastTableView(table, base_mast_table):
 
     solara.lab.theme.themes.light.primary = "#00627e"
     expanded_ids, set_expanded_ids = solara.use_state(set())
+    target_model_id = solara.use_reactive("")
 
     with solara.Column(
+        classes=["mast-table-view"],
         style={
-            "overflow-y": "auto",
+            "width": "100%",
+            "min-width": "0",
         }
-    ):
+    ) as mast_table_view:
+        solara.Style(
+            """
+            body.jupyter-widgets-popout-container .mast-table-view {
+                width: 100vw;
+                max-width: 100vw;
+            }
+            """
+        )
         with solara.Row():
             # creating popout conditions panel
             with solara.Card(
@@ -1081,6 +1093,26 @@ def MastTableView(table, base_mast_table):
                     drawer_open=drawer_open,
                     set_drawer_open=set_drawer_open,
                 )
+                # Popout button overlays the BaseMastTable
+                if target_model_id.value:
+                    with solara.Column(
+                        style={
+                            "position": "absolute",
+                            "top": "25px",
+                            "right": "10px",
+                            "z-index": "1000",
+                        }
+                    ):
+                        PopoutButton.element(
+                            target_model_id=target_model_id.value,
+                            window_features="popup,width=1200,height=600",
+                        )
+
+    solara.use_effect(
+        lambda: target_model_id.set(
+            solara.get_widget(mast_table_view)._model_id
+        )
+    )
 
 
 class MastTable:
