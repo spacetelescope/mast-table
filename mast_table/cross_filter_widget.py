@@ -664,6 +664,23 @@ def MastTableView(table, base_mast_table):
     solara.lab.theme.themes.light.primary = "#00627e"
     expanded_ids, set_expanded_ids = solara.use_state(set())
 
+    solara.Style(
+        """
+        .mast-table-alert {
+            background-color: light-dark(#b4dbe9, #013b4d) !important;
+            color: light-dark(black, white) !important;
+            margin-bottom: 16px !important;
+        }
+        .mast-table-alert .v-alert__content,
+        .mast-table-alert .v-alert__prepend .v-icon {
+            color: inherit !important;
+        }
+        .mast-table-alert .v-alert__prepend .v-icon {
+            margin-top: 15px !important;
+        }
+        """
+    )
+
     with solara.Column(
         style={
             "overflow-y": "auto",
@@ -1051,11 +1068,21 @@ def MastTableView(table, base_mast_table):
                         multiple=False,
                         filtered=pending_value is not None,
                         count=len(table_filtered) if table_filtered is not None else len(table),
-                        messages=(
-                            f"Too many unique values, will only show the first {max_unique}"
-                            if len(value_counts) > max_unique else ""
-                        ),
                     )
+
+                    if len(value_counts) > max_unique:
+                        solara.Info(
+                            label=(
+                                f"Column {pending_column} has more than "
+                                f"{max_unique} unique values. Showing the "
+                                f"first {max_unique}."
+                            ),
+                            dense=True,
+                            text=False,
+                            outlined=False,
+                            icon=True,
+                            classes=["mast-table-alert"],
+                        )
 
                 with solara.Row(justify="end"):
                     solara.Button(
