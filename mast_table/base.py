@@ -270,15 +270,19 @@ class BaseMastTable(VuetifyTemplate):
             order = np.argsort(table[key], kind="stable")
             if reverse:
                 order = order[::-1]
-            table = table[order]
 
         # "All" option: serialize the full table intentionally.
         if per_page == -1:
+            if self.sort_by:
+                table = table[order]
             self.items = serialize(table)
             return
         start = (page - 1) * per_page
         end = start + per_page
-        page_table = table[start:end]
+        if self.sort_by:
+            page_table = table[order[start:end]]
+        else:
+            page_table = table[start:end]
         self.items = serialize(page_table)
 
     def _set_item_key(self, table_columns, item_key, n_rows_slow=10e6):
