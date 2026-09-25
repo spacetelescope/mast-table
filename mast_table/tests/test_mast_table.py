@@ -1,4 +1,4 @@
-from mast_table.base import BaseMastTable, serialize
+from mast_table.base import BaseMastTable, col_unique_row_index, serialize
 import numpy as np
 import astropy.units as u
 from astropy.table import Table
@@ -26,16 +26,22 @@ def test_server_side_pagination(mast_observation_table):
     n_rows = len(mast_observation_table)
     mast_table = BaseMastTable(mast_observation_table, items_per_page=2)
 
-    # full row cache holds every row, while only the first page is pushed to the UI
+    # the row cache now holds a reference to the astropy Table (no upfront
+    # whole-table serialization); only the first page is pushed to the UI
     assert mast_table.server_pagination is True
     assert mast_table.server_items_length == n_rows
+    assert mast_table._all_items is mast_table.table
     assert len(mast_table._all_items) == n_rows
     assert len(mast_table.items) == min(2, n_rows)
 
     # simulate the frontend updating page/itemsPerPage and verify the slice updates
     mast_table.table_options = {'page': 2, 'itemsPerPage': 2}
     assert len(mast_table.items) == min(2, max(0, n_rows - 2))
-    assert mast_table.items[0] == mast_table._all_items[2]
+    # the first row of page 2 should correspond to the third row of the cache
+    assert (
+        mast_table.items[0][col_unique_row_index]
+        == str(mast_table._all_items[col_unique_row_index][2])
+    )
 
     # itemsPerPage = -1 means "show all"
     mast_table.table_options = {'page': 1, 'itemsPerPage': -1}
@@ -84,7 +90,7 @@ def test_serialize_respects_column_format():
 
 def test_column_format_propagates_to_widget(mast_observation_table):
     """Setting ``Column.info.format`` before constructing the widget should
-    show up in the cached items pushed to the UI."""
+    show up in the items pushed to the UI."""
     col = next(
         (c for c in mast_observation_table.colnames
          if mast_observation_table[c].dtype.kind == 'f'),
@@ -92,9 +98,13 @@ def test_column_format_propagates_to_widget(mast_observation_table):
     )
     assert col is not None
     mast_observation_table[col].info.format = '.2f'
-    mast_table = BaseMastTable(mast_observation_table)
-    # every cached row should have the formatted (string) value for this column
-    for row in mast_table._all_items:
+    # request "All" so the whole (small) fixture is serialized to ``items``
+    mast_table = BaseMastTable(
+        mast_observation_table,
+        items_per_page=len(mast_observation_table),
+    )
+    # every visible row should have the formatted (string) value for this column
+    for row in mast_table.items:
         value = row[col]
         # NaNs become '' otherwise we expect a formatted string with 2 decimals
         assert value == '' or (isinstance(value, str) and value.count('.') == 1

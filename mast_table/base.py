@@ -166,9 +166,9 @@ class BaseMastTable(VuetifyTemplate):
             ``ipyvuetify.VuetifyTemplate``.
         """
 
-        # initialize the row cache, so the ``table_options`` observer is safe to fire
+        # initialize the table cache, so the ``table_options`` observer is safe to fire
         # if that traitlet is passed in via ``kwargs``.
-        self._all_items = []
+        self._all_items = None
 
         super().__init__(**kwargs)
 
@@ -180,7 +180,7 @@ class BaseMastTable(VuetifyTemplate):
         if not self.table_options:
             self.table_options = {'page': 1, 'itemsPerPage': self.items_per_page}
 
-        self._all_items = serialize(self.table)
+        self._all_items = self.table
         self.server_items_length = len(self._all_items)
         self._push_current_page()
 
@@ -239,42 +239,47 @@ class BaseMastTable(VuetifyTemplate):
 
     @observe('table_options')
     def _table_options_changed(self, msg):
-        if not self.server_pagination or not self._all_items:
+        if not self.server_pagination or self._all_items is None:
             return
         self._push_current_page()
 
     def update_items(self, table):
         """Update the table data and refresh the current page."""
-        self._all_items = serialize(table)
+        self._all_items = table
         self.server_items_length = len(self._all_items)
         self._push_current_page()
 
     def _push_current_page(self):
-        """Push only the current page slice of ``_all_items`` to ``items``."""
+        """Push only the current page of the table to ``items``."""
+        if self._all_items is None:
+            self.items = []
+            return
+        table = self._all_items
         if not self.server_pagination:
-            self.items = list(self._all_items)
+            self.items = serialize(table)
             return
         opts = self.table_options or {}
         page = opts.get('page', 1)
         per_page = opts.get('itemsPerPage', self.items_per_page)
 
-        items = list(self._all_items)
-        # apply sorting before pagination
+        # Apply sorting before pagination.
         if self.sort_by:
             sort = self.sort_by[0]
             key = sort["key"]
             reverse = sort["order"] == "desc"
-            items.sort(
-                key=lambda item: item.get(key),
-                reverse=reverse,
-            )
-        self.server_items_length = len(items)
+            order = np.argsort(table[key], kind="stable")
+            if reverse:
+                order = order[::-1]
+            table = table[order]
+
+        # "All" option: serialize the full table intentionally.
         if per_page == -1:
-            self.items = items
+            self.items = serialize(table)
             return
         start = (page - 1) * per_page
         end = start + per_page
-        self.items = items[start:end]
+        page_table = table[start:end]
+        self.items = serialize(page_table)
 
     def _set_item_key(self, table_columns, item_key, n_rows_slow=10e6):
         """
