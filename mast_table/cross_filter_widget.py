@@ -8,6 +8,7 @@ import uuid
 from IPython.display import display
 from ipypopout import PopoutButton
 from sidecar import Sidecar
+import ipywidgets as widgets
 
 import solara
 import reacton.ipyvuetify as v
@@ -547,7 +548,7 @@ def SelectableTable(
 
 
 @solara.component
-def MastTableView(table, base_mast_table):
+def MastTableView(table, base_mast_table, on_popout_button=None):
     """Displays selectable table that participates in cross-filtering.
 
     * Incoming cross-filters from other components narrow which rows
@@ -563,6 +564,9 @@ def MastTableView(table, base_mast_table):
 
     base_mast_table : `BaseMastTable`
         BaseMastTable widget to display.
+
+    on_popout_button: callable (optional, default is `None`)
+        Callback to expose popout button.
 
     """
     solara.provide_cross_filter()
@@ -1109,11 +1113,19 @@ def MastTableView(table, base_mast_table):
                             window_features="popup,width=1200,height=600",
                         )
 
-    solara.use_effect(
-        lambda: target_model_id.set(
-            solara.get_widget(mast_table_view)._model_id
+    def set_popout():
+        mast_table_widget = solara.get_widget(mast_table_view)
+        target_model_id.set(mast_table_widget._model_id)
+
+        popout_button = PopoutButton(
+            target=mast_table_widget,
+            window_features="popup,width=1200,height=600",
         )
-    )
+
+        if on_popout_button is not None:
+            on_popout_button(popout_button)
+
+    solara.use_effect(set_popout)
 
 
 class MastTable:
@@ -1149,6 +1161,7 @@ class MastTable:
             item_key=col_unique_row_index,
             **kwargs,
         )
+        self.popout_button = None
 
     def __getattr__(self, name):
         return getattr(self.widget, name)
@@ -1175,17 +1188,21 @@ class MastTable:
     def items(self, value):
         self.widget.items = value
 
+    def _set_popout_button(self, popout_button):
+        self.popout_button = popout_button
+
     def _ipython_display_(self):
         display(
             MastTableView(
                 self._mast_table_source,
                 base_mast_table=self.widget,
+                on_popout_button=self._set_popout_button,
             )
         )
 
     def show(self, loc="inline", title="MastTable"):
         """
-        Display the mast-table.
+        Display the MastTable.
 
         Parameters
         ----------
@@ -1194,10 +1211,14 @@ class MastTable:
                 "inline": Displays the MastTable inline in a notebook.
                 "sidecar": Displays the MastTable in a separate JupyterLab window from the
                     notebook, with location decided by 'anchor'. Anchor options available from
-                    ``jupyterlab-sidecar`` include:
+                    ``jupyterlab-sidecar`` are:
                         {'split-right', 'split-left', 'split-top', 'split-bottom', 'tab-before',
                          'tab-after', 'right'}
                     Example loc for a sidecar at the bottom is `loc='sidecar:split-bottom'`.
+                "popout": Display the MastTable in a detached display. By default, a new
+                    window will open (browser popup permissions required). Anchor options are:
+                        * ``popout:window`` (default, opens MastTable in a new, detached popout)
+                        * ``popout:tab`` (opens MastTable in a new, detached tab in your browser)
 
         title : str, optional (default "MastTable")
             The title of the sidecar tab, only applicable to a "sidecar" display.
@@ -1219,12 +1240,30 @@ class MastTable:
             if anchor not in valid_anchors:
                 raise ValueError(
                     "Invalid anchor provided. Must be one of the available from "
-                    "``jupyterlab-sidecar``. Valid anchors include: "
+                    "``jupyterlab-sidecar``. Valid anchors are: "
                     f"{valid_anchors[:-1]}")
 
             sc = Sidecar(title=title, anchor=anchor)
             with sc:
                 self._ipython_display_()
+
+        elif loc.startswith("popout"):
+            if self.popout_button is None:
+                self._hidden_output = widgets.Output()
+                self._hidden_output.layout.display = "none"
+
+                with self._hidden_output:
+                    self._ipython_display_()
+
+            anchor = None if loc == "popout" else loc.split(":")[-1]
+            if anchor in (None, "window"):
+                self.popout_button.open_window()
+            elif anchor == "tab":
+                self.popout_button.open_tab()
+            else:
+                raise ValueError(
+                    "Invalid anchor provided. Must be 'window' or 'tab'."
+                )
 
 
 def get_current_table():
