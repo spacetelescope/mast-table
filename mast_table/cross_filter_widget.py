@@ -669,14 +669,15 @@ def MastTableView(table, base_mast_table):
         .mast-table-alert {
             background-color: light-dark(#b4dbe9, #013b4d) !important;
             color: light-dark(black, white) !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 16px;
+            padding-inline-start: 8px;
         }
         .mast-table-alert .v-alert__content,
         .mast-table-alert .v-alert__prepend .v-icon {
             color: inherit !important;
         }
-        .mast-table-alert .v-alert__prepend .v-icon {
-            margin-top: 15px !important;
+        .mast-table-alert .v-alert__prepend {
+            margin-inline-end: 8px;
         }
         """
     )
@@ -1073,7 +1074,7 @@ def MastTableView(table, base_mast_table):
                     if len(value_counts) > max_unique:
                         solara.Info(
                             label=(
-                                f"Column {pending_column} has more than "
+                                f"{pending_column} has more than "
                                 f"{max_unique} unique values. Showing the "
                                 f"first {max_unique}."
                             ),
