@@ -363,9 +363,47 @@ class BaseMastTable(VuetifyTemplate):
         import jdaviz as jd
 
         viz = jd.gca()
+        selected_rows_table = self._selected_rows_table_from_args(args)
+
+        if self._is_fileset:
+            from jdaviz.core.region_translators import stcs_string2region
+            from regions import Regions
+
+            footprints = viz.plugins['Footprints']
+            orientation = viz.plugins['Orientation']
+            current_alignment = getattr(
+                orientation.align_by, 'selected', orientation.align_by
+            )
+            if current_alignment != 'WCS':
+                orientation.align_by = 'WCS'
+
+            # footprint marks are only rendered while the plugin is active
+            footprints.open_in_tray(scroll_to=False)
+            footprints.keep_active = True
+
+            overlay = 'mast-table selection'
+            for existing_overlay in list(footprints.overlay.choices):
+                if (
+                    existing_overlay == overlay
+                    or existing_overlay.startswith(f'{overlay} ')
+                ):
+                    footprints.remove_overlay(existing_overlay)
+
+            # drop the previous import so the new overlay isn't given cached regions
+            if footprints.preset.selected == 'From File...':
+                footprints.preset.selected = footprints.preset.choices[0]
+
+            footprints.add_overlay(overlay)
+            footprints.import_region(Regions([
+                stcs_string2region(region)
+                for region in self._s_regions_from_table(selected_rows_table)
+            ]))
+            if 'default' in footprints.overlay.choices:
+                footprints.remove_overlay('default')
+            return viz
 
         with viz.batch_load():
-            for filename in self.selected_rows_table['filename']:
+            for filename in selected_rows_table['filename']:
                 _download_from_mast(filename)
                 viz.load(filename, format="Image")
 
@@ -387,6 +425,7 @@ class BaseMastTable(VuetifyTemplate):
         from mast_aladin.app import gca
 
         mal = gca()
+        selected_rows_table = self._selected_rows_table_from_args(args)
 
         if self._is_fileset:
             if (
@@ -397,21 +436,32 @@ class BaseMastTable(VuetifyTemplate):
                 self._aladin_fileset_overlay = None
 
             self._aladin_fileset_overlay = mal.add_graphic_overlay_from_stcs(
-                self._selected_s_regions(),
+                self._s_regions_from_table(selected_rows_table),
                 name='mast-table selection',
             )
             self._aladin_fileset_app = mal
             return mal
 
-        for filename in self.selected_rows_table['filename']:
+        for filename in selected_rows_table['filename']:
             _download_from_mast(filename)
             mal.delayed_add_fits(filename)
 
         return mal
 
     def _selected_s_regions(self):
+        return self._s_regions_from_table(self.selected_rows_table)
+
+    def _selected_rows_table_from_args(self, args):
+        selected_rows = (
+            args[0]
+            if args and isinstance(args[0], list)
+            else self.selected_rows
+        )
+        return self.table[[int(value) for value in selected_rows]]
+
+    def _s_regions_from_table(self, table):
         regions = []
-        for region in self.selected_rows_table['s_region']:
+        for region in table['s_region']:
             if np.ma.is_masked(region) or not str(region).strip():
                 continue
             regions.extend(
@@ -442,7 +492,7 @@ class BaseMastTable(VuetifyTemplate):
         is_product_list = mission == 'list_products' and 'filename' in columns
         is_fileset = mission in validate.missions and 's_region' in columns
         self.enable_load_in_aladin = is_product_list or is_fileset
-        self.enable_load_in_jdaviz = is_product_list
+        self.enable_load_in_jdaviz = is_product_list or is_fileset
         self.enable_load_in_app = (
             self.enable_load_in_aladin or self.enable_load_in_jdaviz
         )
