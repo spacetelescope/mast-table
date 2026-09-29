@@ -104,6 +104,8 @@ class BaseMastTable(VuetifyTemplate):
     show_tooltips = Bool(True).tag(sync=True)
     menu_open = Bool(False).tag(sync=True)
     enable_load_in_app = Bool(False).tag(sync=True)
+    enable_load_in_aladin = Bool(False).tag(sync=True)
+    enable_load_in_jdaviz = Bool(False).tag(sync=True)
     mission = Unicode(allow_none=True).tag(sync=True)
     filter_tray_open = Bool(False).tag(sync=True)
     # pagination traitlets
@@ -169,6 +171,8 @@ class BaseMastTable(VuetifyTemplate):
         # initialize the table cache, so the ``table_options`` observer is safe to fire
         # if that traitlet is passed in via ``kwargs``.
         self._all_items = None
+        self._aladin_fileset_overlay = None
+        self._aladin_fileset_app = None
 
         super().__init__(**kwargs)
 
@@ -200,13 +204,20 @@ class BaseMastTable(VuetifyTemplate):
 
         self.column_descriptions = []
 
-        if mission := validate.detect_mission_or_products(table):
-            self.column_descriptions = validate.get_column_descriptions(mission, table)
+        if detected_mission := validate.detect_mission_or_products(table):
+            if not self.mission:
+                self.mission = detected_mission
+
+            self.column_descriptions = validate.get_column_descriptions(
+                detected_mission, table
+            )
 
             # if the user hasn't defined the ra/dec columns, use
             # the expected MastMissions names for this mission:
             if ra_column is None and dec_column is None:
-                ra_column, dec_column = mission_mast_ra_dec_colnames[mission]
+                ra_column, dec_column = mission_mast_ra_dec_colnames[detected_mission]
+
+        self._update_enable_load_in_app()
 
         # create headers with expected vuetify3 formatting and descriptions
         self.headers = [
@@ -377,15 +388,68 @@ class BaseMastTable(VuetifyTemplate):
 
         mal = gca()
 
+        if self._is_fileset:
+            if (
+                self._aladin_fileset_overlay is not None
+                and self._aladin_fileset_app is mal
+            ):
+                mal.remove_overlay(self._aladin_fileset_overlay)
+                self._aladin_fileset_overlay = None
+
+            self._aladin_fileset_overlay = mal.add_graphic_overlay_from_stcs(
+                self._selected_s_regions(),
+                name='mast-table selection',
+            )
+            self._aladin_fileset_app = mal
+            return mal
+
         for filename in self.selected_rows_table['filename']:
             _download_from_mast(filename)
             mal.delayed_add_fits(filename)
 
         return mal
 
+    def _selected_s_regions(self):
+        regions = []
+        for region in self.selected_rows_table['s_region']:
+            if np.ma.is_masked(region) or not str(region).strip():
+                continue
+            regions.extend(
+                value.strip()
+                for value in re.split(
+                    r'(?=\b(?:POLYGON|CIRCLE|ELLIPSE)\b)',
+                    str(region),
+                    flags=re.IGNORECASE,
+                )
+                if value.strip()
+            )
+        return regions
+
+    @property
+    def _is_product_list(self):
+        return (self.mission or '').lower() == 'list_products'
+
+    @property
+    def _is_fileset(self):
+        return (
+            (self.mission or '').lower() in validate.missions
+            and 's_region' in self.table.colnames
+        )
+
+    def _update_enable_load_in_app(self):
+        columns = self.table.colnames if self.table is not None else []
+        mission = (self.mission or '').lower()
+        is_product_list = mission == 'list_products' and 'filename' in columns
+        is_fileset = mission in validate.missions and 's_region' in columns
+        self.enable_load_in_aladin = is_product_list or is_fileset
+        self.enable_load_in_jdaviz = is_product_list
+        self.enable_load_in_app = (
+            self.enable_load_in_aladin or self.enable_load_in_jdaviz
+        )
+
     @observe('mission')
     def _on_mission_update(self, msg={}):
-        self.enable_load_in_app = msg['new'] == 'list_products'
+        self._update_enable_load_in_app()
 
 
 def _download_from_mast(product_file_name):
