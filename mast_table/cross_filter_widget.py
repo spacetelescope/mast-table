@@ -21,6 +21,7 @@ from mast_table.components.cross_filter_select import Select
 from mast_table.components.cross_filter_input import Input
 from mast_table.components.info_box import InfoBox
 
+
 # register loaded table widgets as they're initialized
 _table_widgets = []
 
