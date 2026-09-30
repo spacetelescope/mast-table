@@ -19,7 +19,7 @@ from mast_table.cross_filter_utils import (
 )
 from mast_table.components.cross_filter_select import Select
 from mast_table.components.cross_filter_input import Input
-
+from mast_table.components.info_box import InfoBox
 
 # register loaded table widgets as they're initialized
 _table_widgets = []
@@ -664,24 +664,6 @@ def MastTableView(table, base_mast_table):
     solara.lab.theme.themes.light.primary = "#00627e"
     expanded_ids, set_expanded_ids = solara.use_state(set())
 
-    solara.Style(
-        """
-        .mast-table-alert {
-            background-color: light-dark(#b4dbe9, #013b4d) !important;
-            color: light-dark(black, white) !important;
-            margin-bottom: 16px;
-            padding-inline-start: 8px;
-        }
-        .mast-table-alert .v-alert__content,
-        .mast-table-alert .v-alert__prepend .v-icon {
-            color: inherit !important;
-        }
-        .mast-table-alert .v-alert__prepend {
-            margin-inline-end: 8px;
-        }
-        """
-    )
-
     with solara.Column(
         style={
             "overflow-y": "auto",
@@ -1072,17 +1054,12 @@ def MastTableView(table, base_mast_table):
                     )
 
                     if len(value_counts) > max_unique:
-                        solara.Info(
-                            label=(
-                                f"{pending_column} has more than "
-                                f"{max_unique} unique values. Showing the "
-                                f"first {max_unique}."
+                        InfoBox.element(
+                            text=(
+                                f"{pending_column} has {len(value_counts)} unique values. "
+                                f"Showing the first {max_unique}."
                             ),
-                            dense=True,
-                            text=False,
-                            outlined=False,
-                            icon=True,
-                            classes=["mast-table-alert"],
+                            icon="mdi-information"
                         )
 
                 with solara.Row(justify="end"):
