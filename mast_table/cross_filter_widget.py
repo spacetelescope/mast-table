@@ -137,14 +137,14 @@ def RemoveConditionButton(
     solara.Button(
         icon_name="mdi-close",
         on_click=lambda: on_remove(filter_id),
-        style={"background-color": "#00627e", "color": "white"},
+        style={"background-color": "light-dark(#00617e, #013b4d)", "color": "white"},
         classes=["close-button"],
     )
     solara.Style(
         """
         .close-button {
-            min-width: 10px;
-            width: 30px;
+            min-width: 40px;
+            width: 40px;
             height: 30px;
             padding: 0;
         }
@@ -321,14 +321,20 @@ def CrossFilterSelect(
                                 [item["value"] for item in items]
                             ),
                             text=True,
-                            style={"background-color": "#00627e", "color": "white"}
+                            style={
+                                "background-color": "light-dark(#00617e, #013b4d)",
+                                "color": "white"
+                            }
                         )
 
                         solara.Button(
                             "Clear All",
                             on_click=lambda: set_filter_values([]),
                             text=True,
-                            style={"background-color": "#00627e", "color": "white"}
+                            style={
+                                "background-color": "light-dark(#00617e, #013b4d)",
+                                "color": "white"
+                            }
                         )
 
             else:
@@ -667,7 +673,8 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
             active_masks
         )
 
-    solara.lab.theme.themes.light.primary = "#00627e"
+    solara.lab.theme.themes.light.primary = "#00617e"
+    solara.lab.theme.themes.dark.primary = "#013b4d"
     expanded_ids, set_expanded_ids = solara.use_state(set())
     target_model_id = solara.use_reactive("")
 
@@ -728,7 +735,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                             }
                             .custom-toggle .v-btn {
                                 background-color: #F2F2F2;
-                                color: #00627e;
+                                color: light-dark(#00617e, #013b4d);
                                 height: 40px;
                                 width: 50px;
                                 min-width: 50px;
@@ -738,7 +745,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                                 padding: 0;
                             }
                             .custom-toggle .v-btn--active {
-                                background-color: #00627e;
+                                background-color: light-dark(#00617e, #013b4d);
                                 color: white;
                             }
                             """
@@ -767,7 +774,10 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                             solara.Button(
                                 icon_name="mdi-refresh",
                                 on_click=lambda *args: (set_filters([]), set_filter_masks({})),
-                                style={"background-color": "#00627e", "color": "white"},
+                                style={
+                                    "background-color": "light-dark(#00617e, #013b4d)",
+                                    "color": "white"
+                                },
                                 classes=["reset-button"]
                             )
 
@@ -791,7 +801,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                         with solara.Card(
                             classes=["filter-card"],
                             style={
-                                "border": "2px solid #00627e",
+                                "border": "2px solid light-dark(#00617e, #013b4d)",
                                 "box-shadow": "none",
                                 "width": "100%",
                             }
@@ -954,8 +964,8 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                     v_model=pending_column,
                     on_v_model=on_pending_column_change,
                     density="compact",
-                    bg_color="white",
-                    item_color="#00627e"
+                    bg_color="transparent",
+                    item_color="light-dark(#00617e, #013b4d)"
                 )
 
                 opt = slide_or_select(table, pending_column)
@@ -1080,7 +1090,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                         icon_name="mdi-plus",
                         on_click=lambda *args: add_filter(opt),
                         disabled=fully_masked,
-                        style={"background-color": "#00627e", "color": "white"}
+                        style={"background-color": "light-dark(#00617e, #013b4d)", "color": "white"}
                     )
                 if fully_masked:
                     with solara.Row(justify="end"):

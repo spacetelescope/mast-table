@@ -2,7 +2,11 @@
   <v-container fluid class="base-mast-table">
     <div class="base-mast-table-toolbar">
       <v-btn
-        :color="filter_tray_open ? undefined : '#b4dbe9'"
+        :style="{
+          backgroundColor: filter_tray_open
+            ? 'transparent'
+            : 'light-dark(#b4dbe9, #013b4d)'
+        }"
         @click="filter_tray_open = !filter_tray_open"
       >
         {{ filter_tray_open ? 'Hide Conditions' : 'Show Conditions' }}
@@ -222,10 +226,10 @@
 
 /* alternating rows */
 :deep(.base-mast-data-table .v-data-table__tr:nth-child(even)) {
-  background: #f1f2f7;
+  background: light-dark(#f1f2f7, black);
 }
 :deep(.base-mast-data-table .v-data-table__tr:nth-child(odd)) {
-  background: white;
+  background: light-dark(white, #172a32);
 }
 
 /* selected */
@@ -237,20 +241,20 @@
 /* footer */
 :deep(.base-mast-data-table .v-data-table-footer) {
   background-color: light-dark(#b4dbe9, #013b4d);
-  color: black;
+  color: light-dark(black, white);
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-field) {
   background-color: light-dark(#b4dbe9, #013b4d);
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-field__input),
 :deep(.base-mast-data-table .v-data-table-footer .v-label) {
-  color: black;
+  color: light-dark(black, white);
 }
 :deep(.base-mast-data-table .v-data-table-footer .v-btn) {
-  color: black;
+  color: light-dark(black, white);
 }
 :deep(.base-mast-data-table .v-data-table-footer .items-per-page-options) {
-  color: black;
+  color: light-dark(black, white);
 }
 
 /* reducing whitespace between rows */
