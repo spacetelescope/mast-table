@@ -22,6 +22,7 @@ from mast_table.cross_filter_utils import (
 )
 from mast_table.components.cross_filter_select import Select
 from mast_table.components.cross_filter_input import Input
+from mast_table.components.info_box import InfoBox
 
 
 # register loaded table widgets as they're initialized
@@ -1068,11 +1069,16 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                         multiple=False,
                         filtered=pending_value is not None,
                         count=len(table_filtered) if table_filtered is not None else len(table),
-                        messages=(
-                            f"Too many unique values, will only show the first {max_unique}"
-                            if len(value_counts) > max_unique else ""
-                        ),
                     )
+
+                    if len(value_counts) > max_unique:
+                        InfoBox.element(
+                            text=(
+                                f"{pending_column} has {len(value_counts)} unique values. "
+                                f"Showing the first {max_unique}."
+                            ),
+                            icon="mdi-information"
+                        )
 
                 with solara.Row(justify="end"):
                     solara.Button(
