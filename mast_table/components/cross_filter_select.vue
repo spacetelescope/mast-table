@@ -13,7 +13,7 @@
     density="compact"
     class="cross-filter-select"
     :menu-props="{ contentClass: 'cross-filter-menu' }"
-    bg-color="white"
+    bg-color="transparent"
     item-color="#00627e"
   >
     <template v-slot:item="{ props, item }">
