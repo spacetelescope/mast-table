@@ -106,8 +106,6 @@ class BaseMastTable(VuetifyTemplate):
     show_tooltips = Bool(True).tag(sync=True)
     menu_open = Bool(False).tag(sync=True)
     enable_load_in_app = Bool(False).tag(sync=True)
-    enable_load_in_aladin = Bool(False).tag(sync=True)
-    enable_load_in_jdaviz = Bool(False).tag(sync=True)
     mission = Unicode(allow_none=True).tag(sync=True)
     filter_tray_open = Bool(False).tag(sync=True)
     # pagination traitlets
@@ -495,15 +493,8 @@ class BaseMastTable(VuetifyTemplate):
         )
 
     def _update_enable_load_in_app(self):
-        self.enable_load_in_aladin = (
-            self._is_product_list or self._can_open_footprints
-        )
-        self.enable_load_in_jdaviz = (
-            self._is_product_list or self._can_open_footprints
-        )
         self.enable_load_in_app = (
-            self.enable_load_in_aladin or
-            self.enable_load_in_jdaviz
+            self._is_product_list or self._can_open_footprints
         )
 
     @observe('mission')

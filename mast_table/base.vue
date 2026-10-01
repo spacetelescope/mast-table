@@ -77,11 +77,10 @@
         </v-card>
       </v-menu>
 
-      <div v-if="enable_load_in_aladin || enable_load_in_jdaviz">
+      <div v-if="enable_load_in_app">
         <v-tooltip location="top">
         <template v-slot:activator="{ props }">
           <v-btn
-            v-if="enable_load_in_aladin"
             v-bind="props"
             :disabled="selected_rows.length === 0"
             class="open-in elevation-1"
@@ -96,7 +95,6 @@
         <v-tooltip location="top">
         <template v-slot:activator="{ props }">
           <v-btn
-            v-if="enable_load_in_jdaviz"
             v-bind="props"
             :disabled="selected_rows.length === 0"
             class="open-in elevation-1"

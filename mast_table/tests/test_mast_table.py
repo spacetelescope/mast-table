@@ -38,8 +38,7 @@ def test_fileset_results_enable_viewer_buttons(mast_observation_table):
     # a fileset query result is recognized from its columns, and its
     # footprints can be sent to either viewer
     assert mast_table.mission == 'jwst'
-    assert mast_table.enable_load_in_aladin
-    assert mast_table.enable_load_in_jdaviz
+    assert mast_table.enable_load_in_app
 
 
 def test_product_list_results_enable_viewer_buttons():
@@ -50,8 +49,7 @@ def test_product_list_results_enable_viewer_buttons():
     mast_table = BaseMastTable(products)
 
     assert mast_table.mission == 'list_products'
-    assert mast_table.enable_load_in_aladin
-    assert mast_table.enable_load_in_jdaviz
+    assert mast_table.enable_load_in_app
 
 
 def test_selected_s_regions_splits_rows_with_several_shapes():
