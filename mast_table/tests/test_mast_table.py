@@ -1,10 +1,10 @@
 from mast_table.base import BaseMastTable, col_unique_row_index, serialize
-import pytest
 import numpy as np
 import astropy.units as u
 from astropy.table import Table
 from jdaviz.core.marks import FootprintOverlay
 from mast_aladin.app import MastAladin
+
 
 def footprint_marks(jdaviz_app):
     """Footprint overlays currently drawn in the jdaviz image viewer."""
@@ -118,7 +118,6 @@ def test_selected_fileset_rows_shown_in_aladin(mast_observation_table):
     assert mast_table.vue_open_selected_rows_in_aladin(['2']) is aladin
     assert mast_table._aladin_fileset_overlay is not first_overlay
     assert mast_table._aladin_fileset_overlay.name == 'mast-table selection'
-
 
 
 def test_server_side_pagination(mast_observation_table):
