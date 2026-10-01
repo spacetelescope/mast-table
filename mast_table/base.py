@@ -24,7 +24,7 @@ col_unique_row_index = '_unique_row_index'
 mission_mast_ra_dec_colnames = dict(
     hst=['sci_ra', 'sci_dec'],
     roman=['ra', 'dec'],
-    jwst=['targ_ra', 'targ_def'],
+    jwst=['targ_ra', 'targ_dec'],
     list_products=['', ''],
 )
 
