@@ -8,10 +8,12 @@ from ipyvuetify import VuetifyTemplate
 import numpy as np
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+import jdaviz as jd
+from jdaviz.core.region_translators import stcs_string2region
+from regions import Regions
 
 from mast_table import validate
 from astroquery.mast import MastMissions
-
 
 __all__ = [
     'BaseMastTable',
@@ -231,9 +233,9 @@ class BaseMastTable(VuetifyTemplate):
 
         # conditional updating of MastAladin app target based on ra/dec
         if (
-                ra_column in columns and
-                dec_column in columns and
-                update_viewport and
+            ra_column in columns and
+            dec_column in columns and
+            update_viewport and
                 self.app is not None):
 
             # use the first sky coordinate as a reference for centering the viewer.
@@ -360,14 +362,14 @@ class BaseMastTable(VuetifyTemplate):
         return self.table[[int(value) for value in self.selected_rows]]
 
     def vue_open_selected_rows_in_jdaviz(self, *args):
-        import jdaviz as jd
-
         viz = jd.gca()
         selected_rows_table = self._selected_rows_table_from_args(args)
 
-        if self._is_fileset:
-            from jdaviz.core.region_translators import stcs_string2region
-            from regions import Regions
+        if self._can_open_footprints:
+            regions = self._s_regions_from_table(selected_rows_table)
+
+            if not regions:
+                return viz
 
             footprints = viz.plugins['Footprints']
             orientation = viz.plugins['Orientation']
@@ -396,7 +398,7 @@ class BaseMastTable(VuetifyTemplate):
             footprints.add_overlay(overlay)
             footprints.import_region(Regions([
                 stcs_string2region(region)
-                for region in self._s_regions_from_table(selected_rows_table)
+                for region in regions
             ]))
             if 'default' in footprints.overlay.choices:
                 footprints.remove_overlay('default')
@@ -427,7 +429,12 @@ class BaseMastTable(VuetifyTemplate):
         mal = gca()
         selected_rows_table = self._selected_rows_table_from_args(args)
 
-        if self._is_fileset:
+        if self._can_open_footprints:
+            regions = self._s_regions_from_table(selected_rows_table)
+
+            if not regions:
+                return mal
+
             if (
                 self._aladin_fileset_overlay is not None
                 and self._aladin_fileset_app is mal
@@ -436,10 +443,11 @@ class BaseMastTable(VuetifyTemplate):
                 self._aladin_fileset_overlay = None
 
             self._aladin_fileset_overlay = mal.add_graphic_overlay_from_stcs(
-                self._s_regions_from_table(selected_rows_table),
+                regions,
                 name='mast-table selection',
             )
             self._aladin_fileset_app = mal
+
             return mal
 
         for filename in selected_rows_table['filename']:
@@ -480,21 +488,22 @@ class BaseMastTable(VuetifyTemplate):
         return (self.mission or '').lower() == 'list_products'
 
     @property
-    def _is_fileset(self):
+    def _can_open_footprints(self):
         return (
             (self.mission or '').lower() in validate.missions
             and 's_region' in self.table.colnames
         )
 
     def _update_enable_load_in_app(self):
-        columns = self.table.colnames if self.table is not None else []
-        mission = (self.mission or '').lower()
-        is_product_list = mission == 'list_products' and 'filename' in columns
-        is_fileset = mission in validate.missions and 's_region' in columns
-        self.enable_load_in_aladin = is_product_list or is_fileset
-        self.enable_load_in_jdaviz = is_product_list or is_fileset
+        self.enable_load_in_aladin = (
+            self._is_product_list or self._can_open_footprints
+        )
+        self.enable_load_in_jdaviz = (
+            self._is_product_list or self._can_open_footprints
+        )
         self.enable_load_in_app = (
-            self.enable_load_in_aladin or self.enable_load_in_jdaviz
+            self.enable_load_in_aladin or
+            self.enable_load_in_jdaviz
         )
 
     @observe('mission')
