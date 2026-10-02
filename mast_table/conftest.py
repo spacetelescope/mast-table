@@ -29,7 +29,7 @@ def jdaviz_app():
     A jdaviz app set as the current app, with an image loaded so the
     Footprints plugin has a reference WCS to map footprints onto.
     """
-    import jdaviz
+    jdaviz = pytest.importorskip('jdaviz')
 
     app = jdaviz.new_app(set_as_current=True)
 

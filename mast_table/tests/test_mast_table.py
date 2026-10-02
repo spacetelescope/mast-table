@@ -1,13 +1,13 @@
 from mast_table.base import BaseMastTable, col_unique_row_index, serialize
 import numpy as np
 import astropy.units as u
+import pytest
 from astropy.table import Table
-from jdaviz.core.marks import FootprintOverlay
-from mast_aladin.app import MastAladin
 
 
 def footprint_marks(jdaviz_app):
     """Footprint overlays currently drawn in the jdaviz image viewer."""
+    from jdaviz.core.marks import FootprintOverlay
     glue_viewer = jdaviz_app.viewers['Image']._obj.glue_viewer
     return [
         mark for mark in glue_viewer.figure.marks
@@ -105,6 +105,7 @@ def test_selected_fileset_rows_shown_in_jdaviz(jdaviz_app, mast_observation_tabl
 
 
 def test_selected_fileset_rows_shown_in_aladin(mast_observation_table):
+    MastAladin = pytest.importorskip('mast_aladin.app').MastAladin
     aladin = MastAladin()
     mast_table = BaseMastTable(mast_observation_table)
 
