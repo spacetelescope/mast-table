@@ -64,7 +64,7 @@ def test_selected_s_regions_splits_rows_with_several_shapes():
     mast_table.selected_rows = ['0', '1']
 
     # each shape is sent separately, and blank values are skipped
-    assert mast_table._selected_s_regions() == [first, second]
+    assert mast_table._s_regions_from_table(mast_table.selected_rows_table) == [first, second]
 
 
 def test_selected_rows_follow_the_click(mast_observation_table):

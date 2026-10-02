@@ -389,7 +389,7 @@ class BaseMastTable(VuetifyTemplate):
                 ):
                     footprints.remove_overlay(existing_overlay)
 
-            # drop the previous import so the new overlay isn't given cached regions
+            # clear the previous imported-region state before creating the new overlay
             if footprints.preset.selected == 'From File...':
                 footprints.preset.selected = footprints.preset.choices[0]
 
@@ -453,9 +453,6 @@ class BaseMastTable(VuetifyTemplate):
             mal.delayed_add_fits(filename)
 
         return mal
-
-    def _selected_s_regions(self):
-        return self._s_regions_from_table(self.selected_rows_table)
 
     def _selected_rows_table_from_args(self, args):
         selected_rows = (
