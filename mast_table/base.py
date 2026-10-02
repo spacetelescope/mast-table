@@ -8,10 +8,6 @@ from ipyvuetify import VuetifyTemplate
 import numpy as np
 import astropy.units as u
 from astropy.coordinates import SkyCoord
-import jdaviz as jd
-from jdaviz.core.region_translators import stcs_string2region
-from regions import Regions
-
 from mast_table import validate
 from astroquery.mast import MastMissions
 
@@ -360,6 +356,9 @@ class BaseMastTable(VuetifyTemplate):
         return self.table[[int(value) for value in self.selected_rows]]
 
     def vue_open_selected_rows_in_jdaviz(self, *args):
+        import jdaviz as jd
+        from jdaviz.core.region_translators import stcs_string2region
+        from regions import Regions
         viz = jd.gca()
         selected_rows_table = self._selected_rows_table_from_args(args)
 
