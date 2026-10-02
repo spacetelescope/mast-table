@@ -485,7 +485,8 @@ class BaseMastTable(VuetifyTemplate):
     @property
     def _can_open_footprints(self):
         return (
-            (self.mission or '').lower() in validate.missions
+            self.table is not None
+            and (self.mission or '').lower() in validate.missions
             and 's_region' in self.table.colnames
         )
 
