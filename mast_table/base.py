@@ -227,10 +227,11 @@ class BaseMastTable(VuetifyTemplate):
 
         # conditional updating of MastAladin app target based on ra/dec
         if (
-            ra_column in columns and
-            dec_column in columns and
-            update_viewport and
-                self.app is not None):
+            ra_column in columns
+            and dec_column in columns
+            and update_viewport
+            and self.app is not None
+        ):
 
             # use the first sky coordinate as a reference for centering the viewer.
             # an alternative would be to use e.g. mean(RA), though means would return an
@@ -356,9 +357,29 @@ class BaseMastTable(VuetifyTemplate):
         return self.table[[int(value) for value in self.selected_rows]]
 
     def vue_open_selected_rows_in_jdaviz(self, *args):
-        import jdaviz as jd
-        from jdaviz.core.region_translators import stcs_string2region
-        from regions import Regions
+        """
+        Open the selected rows in the current jdaviz app.
+
+        For tables with footprints (``s_region``), the selected footprints are
+        drawn with the Footprints plugin. This sets ``orientation.align_by = 'WCS'``
+        in the app, since footprints can only be drawn when aligned by WCS.
+        For product lists, the selected files are downloaded and loaded.
+
+        Parameters
+        ----------
+        *args
+            Optionally, a single list of selected row indices sent by the
+            frontend. If omitted, ``selected_rows`` is used.
+        """
+        try:
+            import jdaviz as jd
+            from jdaviz.core.region_translators import stcs_string2region
+            from regions import Regions
+        except ImportError:
+            raise ImportError(
+                "The 'jdaviz' package is required. Install it using: pip install jdaviz"
+            )
+
         viz = jd.gca()
         selected_rows_table = self._selected_rows_table_from_args(args)
 
@@ -421,7 +442,26 @@ class BaseMastTable(VuetifyTemplate):
         return viz
 
     def vue_open_selected_rows_in_aladin(self, *args):
-        from mast_aladin.app import gca
+        """
+        Open the selected rows in the current MastAladin app.
+
+        For tables with footprints (``s_region``), the selected footprints are
+        drawn as a graphic overlay. For product lists, the selected files are
+        downloaded and added to the viewer.
+
+        Parameters
+        ----------
+        *args
+            Optionally, a single list of selected row indices sent by the
+            frontend. If omitted, ``selected_rows`` is used.
+        """
+        try:
+            from mast_aladin.app import gca
+        except ImportError:
+            raise ImportError(
+                "The 'mast-aladin' package is required. "
+                "Install it using: pip install mast-aladin"
+            )
 
         mal = gca()
         selected_rows_table = self._selected_rows_table_from_args(args)
@@ -454,6 +494,13 @@ class BaseMastTable(VuetifyTemplate):
         return mal
 
     def _selected_rows_table_from_args(self, args):
+        """
+        Return selected table rows from a ``vue_open_selected_rows_*`` handler.
+
+        The frontend click sends the current selection as a list, which may be
+        ahead of the synced ``selected_rows`` traitlet. If no list is provided, 
+        fall back to ``selected_rows``.
+        """
         selected_rows = (
             args[0]
             if args and isinstance(args[0], list)
@@ -463,6 +510,9 @@ class BaseMastTable(VuetifyTemplate):
 
     def _s_regions_from_table(self, table):
         regions = []
+        if 's_region' not in table.colnames:
+            return regions
+
         for region in table['s_region']:
             if np.ma.is_masked(region) or not str(region).strip():
                 continue
