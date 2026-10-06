@@ -498,9 +498,10 @@ class BaseMastTable(VuetifyTemplate):
         Return selected table rows from a ``vue_open_selected_rows_*`` handler.
 
         The frontend click sends the current selection as a list, which may be
-        ahead of the synced ``selected_rows`` traitlet. If no list is provided, 
+        ahead of the synced ``selected_rows`` traitlet. If no list is provided,
         fall back to ``selected_rows``.
         """
+
         selected_rows = (
             args[0]
             if args and isinstance(args[0], list)
