@@ -21,8 +21,7 @@ dynamic = [
 [project.optional-dependencies]
 test = [
     "pytest",
-    "jdaviz",
-    "mast-aladin @ git+https://github.com/spacetelescope/mast-aladin.git@main",
+    "jdaviz @ git+https://github.com/spacetelescope/jdaviz.git@main",
 ]
 docs = [
     "sphinx-astropy[confv2]>=1.9.1",

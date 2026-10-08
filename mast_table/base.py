@@ -8,8 +8,10 @@ from ipyvuetify import VuetifyTemplate
 import numpy as np
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+
 from mast_table import validate
 from astroquery.mast import MastMissions
+
 
 __all__ = [
     'BaseMastTable',
@@ -167,8 +169,6 @@ class BaseMastTable(VuetifyTemplate):
         # initialize the table cache, so the ``table_options`` observer is safe to fire
         # if that traitlet is passed in via ``kwargs``.
         self._all_items = None
-        self._aladin_fileset_overlay = None
-        self._aladin_fileset_app = None
 
         super().__init__(**kwargs)
 
@@ -200,20 +200,13 @@ class BaseMastTable(VuetifyTemplate):
 
         self.column_descriptions = []
 
-        if detected_mission := validate.detect_mission_or_products(table):
-            if not self.mission:
-                self.mission = detected_mission
-
-            self.column_descriptions = validate.get_column_descriptions(
-                detected_mission, table
-            )
+        if mission := validate.detect_mission_or_products(table):
+            self.column_descriptions = validate.get_column_descriptions(mission, table)
 
             # if the user hasn't defined the ra/dec columns, use
             # the expected MastMissions names for this mission:
             if ra_column is None and dec_column is None:
-                ra_column, dec_column = mission_mast_ra_dec_colnames[detected_mission]
-
-        self._update_enable_load_in_app()
+                ra_column, dec_column = mission_mast_ra_dec_colnames[mission]
 
         # create headers with expected vuetify3 formatting and descriptions
         self.headers = [
@@ -227,11 +220,10 @@ class BaseMastTable(VuetifyTemplate):
 
         # conditional updating of MastAladin app target based on ra/dec
         if (
-            ra_column in columns
-            and dec_column in columns
-            and update_viewport
-            and self.app is not None
-        ):
+                ra_column in columns and
+                dec_column in columns and
+                update_viewport and
+                self.app is not None):
 
             # use the first sky coordinate as a reference for centering the viewer.
             # an alternative would be to use e.g. mean(RA), though means would return an
@@ -361,73 +353,12 @@ class BaseMastTable(VuetifyTemplate):
         return self.table[[int(value) for value in self.selected_rows]]
 
     def vue_open_selected_rows_in_jdaviz(self, *args):
-        """
-        Open the selected rows in the current jdaviz app.
-
-        For tables with footprints (``s_region``), the selected footprints are
-        drawn with the Footprints plugin. This sets ``orientation.align_by = 'WCS'``
-        in the app, since footprints can only be drawn when aligned by WCS.
-        For product lists, the selected files are downloaded and loaded.
-
-        Parameters
-        ----------
-        *args
-            Optionally, a single list of selected row indices sent by the
-            frontend. If omitted, ``selected_rows`` is used.
-        """
-        try:
-            import jdaviz as jd
-            from jdaviz.core.region_translators import stcs_string2region
-            from regions import Regions
-        except ImportError:
-            raise ImportError(
-                "The 'jdaviz' package is required. Install it using: pip install jdaviz"
-            )
+        import jdaviz as jd
 
         viz = jd.gca()
-        selected_rows_table = self._selected_rows_table_from_args(args)
-
-        if self._can_open_footprints:
-            regions = self._s_regions_from_table(selected_rows_table)
-
-            if not regions:
-                return viz
-
-            footprints = viz.plugins['Footprints']
-            orientation = viz.plugins['Orientation']
-            current_alignment = getattr(
-                orientation.align_by, 'selected', orientation.align_by
-            )
-            if current_alignment != 'WCS':
-                orientation.align_by = 'WCS'
-
-            # footprint marks are only rendered while the plugin is active
-            footprints.open_in_tray(scroll_to=False)
-            footprints.keep_active = True
-
-            overlay = 'mast-table selection'
-            for existing_overlay in list(footprints.overlay.choices):
-                if (
-                    existing_overlay == overlay
-                    or existing_overlay.startswith(f'{overlay} ')
-                ):
-                    footprints.remove_overlay(existing_overlay)
-
-            # clear the previous imported-region state before creating the new overlay
-            if footprints.preset.selected == 'From File...':
-                footprints.preset.selected = footprints.preset.choices[0]
-
-            footprints.add_overlay(overlay)
-            footprints.import_region(Regions([
-                stcs_string2region(region)
-                for region in regions
-            ]))
-            if 'default' in footprints.overlay.choices:
-                footprints.remove_overlay('default')
-            return viz
 
         with viz.batch_load():
-            for filename in selected_rows_table['filename']:
+            for filename in self.selected_rows_table['filename']:
                 _download_from_mast(filename)
                 viz.load(filename, format="Image")
 
@@ -446,112 +377,19 @@ class BaseMastTable(VuetifyTemplate):
         return viz
 
     def vue_open_selected_rows_in_aladin(self, *args):
-        """
-        Open the selected rows in the current MastAladin app.
-
-        For tables with footprints (``s_region``), the selected footprints are
-        drawn as a graphic overlay. For product lists, the selected files are
-        downloaded and added to the viewer.
-
-        Parameters
-        ----------
-        *args
-            Optionally, a single list of selected row indices sent by the
-            frontend. If omitted, ``selected_rows`` is used.
-        """
-        try:
-            from mast_aladin.app import gca
-        except ImportError:
-            raise ImportError(
-                "The 'mast-aladin' package is required. "
-                "Install it using: pip install mast-aladin"
-            )
+        from mast_aladin.app import gca
 
         mal = gca()
-        selected_rows_table = self._selected_rows_table_from_args(args)
 
-        if self._can_open_footprints:
-            regions = self._s_regions_from_table(selected_rows_table)
-
-            if not regions:
-                return mal
-
-            if (
-                self._aladin_fileset_overlay is not None
-                and self._aladin_fileset_app is mal
-            ):
-                mal.remove_overlay(self._aladin_fileset_overlay)
-                self._aladin_fileset_overlay = None
-
-            self._aladin_fileset_overlay = mal.add_graphic_overlay_from_stcs(
-                regions,
-                name='mast-table selection',
-            )
-            self._aladin_fileset_app = mal
-
-            return mal
-
-        for filename in selected_rows_table['filename']:
+        for filename in self.selected_rows_table['filename']:
             _download_from_mast(filename)
             mal.delayed_add_fits(filename)
 
         return mal
 
-    def _selected_rows_table_from_args(self, args):
-        """
-        Return selected table rows from a ``vue_open_selected_rows_*`` handler.
-
-        The frontend click sends the current selection as a list, which may be
-        ahead of the synced ``selected_rows`` traitlet. If no list is provided,
-        fall back to ``selected_rows``.
-        """
-
-        selected_rows = (
-            args[0]
-            if args and isinstance(args[0], list)
-            else self.selected_rows
-        )
-        return self.table[[int(value) for value in selected_rows]]
-
-    def _s_regions_from_table(self, table):
-        regions = []
-        if 's_region' not in table.colnames:
-            return regions
-
-        for region in table['s_region']:
-            if np.ma.is_masked(region) or not str(region).strip():
-                continue
-            regions.extend(
-                value.strip()
-                for value in re.split(
-                    r'(?=\b(?:POLYGON|CIRCLE|ELLIPSE)\b)',
-                    str(region),
-                    flags=re.IGNORECASE,
-                )
-                if value.strip()
-            )
-        return regions
-
-    @property
-    def _is_product_list(self):
-        return (self.mission or '').lower() == 'list_products'
-
-    @property
-    def _can_open_footprints(self):
-        return (
-            self.table is not None
-            and (self.mission or '').lower() in validate.missions
-            and 's_region' in self.table.colnames
-        )
-
-    def _update_enable_load_in_app(self):
-        self.enable_load_in_app = (
-            self._is_product_list or self._can_open_footprints
-        )
-
     @observe('mission')
     def _on_mission_update(self, msg={}):
-        self._update_enable_load_in_app()
+        self.enable_load_in_app = msg['new'] == 'list_products'
 
 
 def _download_from_mast(product_file_name):

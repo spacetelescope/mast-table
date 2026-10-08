@@ -77,19 +77,17 @@
         </v-card>
       </v-menu>
 
-      <div v-if="enable_load_in_app">
+      <div v-if="mission == 'list_products' && enable_load_in_app">
         <v-tooltip location="top">
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
             :disabled="selected_rows.length === 0"
             class="open-in elevation-1"
-            @click="open_selected_rows_in_aladin(selected_rows)"
+            @click="open_selected_rows_in_aladin"
             ><v-icon>mdi-open-in-app</v-icon>aladin</v-btn>
           </template>
-          <div style="text-align: center;">
-            {{ mission == 'list_products' ? 'Download, open selection' : 'Open selection footprints' }}<br />in mast-aladin-lite
-          </div>
+          <div style="text-align: center;">Download, open selection<br />in mast-aladin-lite</div>
         </v-tooltip>
 
         <v-tooltip location="top">
@@ -98,12 +96,10 @@
             v-bind="props"
             :disabled="selected_rows.length === 0"
             class="open-in elevation-1"
-            @click="open_selected_rows_in_jdaviz(selected_rows)"
+            @click="open_selected_rows_in_jdaviz"
             ><v-icon>mdi-open-in-app</v-icon>jdaviz</v-btn>
           </template>
-          <div style="text-align: center;">
-            {{ mission == 'list_products' ? 'Download, open selection' : 'Open selection footprints' }}<br />in jdaviz
-          </div>
+          <div style="text-align: center;">Download, open<br />selection in jdaviz</div>
         </v-tooltip>
       </div>
     </div>
