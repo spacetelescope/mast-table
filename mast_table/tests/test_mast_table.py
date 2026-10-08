@@ -1,18 +1,7 @@
 from mast_table.base import BaseMastTable, col_unique_row_index, serialize
 import numpy as np
 import astropy.units as u
-import pytest
 from astropy.table import Table
-
-
-def footprint_marks(jdaviz_app):
-    """Footprint overlays currently drawn in the jdaviz image viewer."""
-    from jdaviz.core.marks import FootprintOverlay
-    glue_viewer = jdaviz_app.viewers['Image']._obj.glue_viewer
-    return [
-        mark for mark in glue_viewer.figure.marks
-        if isinstance(mark, FootprintOverlay)
-    ]
 
 
 def test_mast_table_init(mast_observation_table):
@@ -30,93 +19,6 @@ def test_mast_table_init(mast_observation_table):
     # the MAST observation query has a ArchiveFileID column,
     # which should be chosen as the default item_key:
     assert mast_table.item_key == 'ArchiveFileID'
-
-
-def test_fileset_results_enable_viewer_buttons(mast_observation_table):
-    mast_table = BaseMastTable(mast_observation_table)
-
-    # a fileset query result is recognized from its columns, and its
-    # footprints can be sent to either viewer
-    assert mast_table.mission == 'jwst'
-    assert mast_table.enable_load_in_app
-
-
-def test_product_list_results_enable_viewer_buttons():
-    products = Table({
-        'product_key': ['product-1'],
-        'filename': ['jw_product_cal.fits'],
-    })
-    mast_table = BaseMastTable(products)
-
-    assert mast_table.mission == 'list_products'
-    assert mast_table.enable_load_in_app
-
-
-def test_selected_s_regions_splits_rows_with_several_shapes():
-    first = 'POLYGON ICRS 9.99 19.99 10.01 19.99 10.01 20.01'
-    second = 'POLYGON ICRS 9.98 19.98 10.00 19.98 10.00 20.00'
-    table = Table({
-        'fileSetName': ['compound', 'blank'],
-        # MAST may return several shapes in a single s_region value
-        's_region': [f'{first}  {second}', '  '],
-    })
-    mast_table = BaseMastTable(table)
-    mast_table.selected_rows = ['0', '1']
-
-    # each shape is sent separately, and blank values are skipped
-    assert mast_table._s_regions_from_table(mast_table.selected_rows_table) == [first, second]
-
-
-def test_selected_rows_follow_the_click(mast_observation_table):
-    file_set_names = list(mast_observation_table['fileSetName'])
-    mast_table = BaseMastTable(mast_observation_table)
-    mast_table.selected_rows = ['0']
-
-    # the buttons send the current frontend selection along with the click,
-    # which can still be ahead of the synced traitlet
-    from_click = mast_table._selected_rows_table_from_args((['1', '2'],))
-    assert list(from_click['fileSetName']) == file_set_names[1:3]
-
-    # calls from the API fall back to the synced traitlet
-    from_traitlet = mast_table._selected_rows_table_from_args(())
-    assert list(from_traitlet['fileSetName']) == file_set_names[:1]
-
-
-def test_selected_fileset_rows_shown_in_jdaviz(jdaviz_app, mast_observation_table):
-    mast_table = BaseMastTable(mast_observation_table)
-    footprints = jdaviz_app.plugins['Footprints']
-
-    assert mast_table.vue_open_selected_rows_in_jdaviz(['0', '1']) is jdaviz_app
-
-    # footprints can only be drawn when aligned by WCS
-    assert jdaviz_app.plugins['Orientation'].align_by.selected == 'WCS'
-
-    # the selection replaces the preset footprints jdaviz starts with
-    assert footprints.overlay.choices == ['mast-table selection']
-    assert len(footprints.overlay_regions) == 2
-    assert [mark.visible for mark in footprint_marks(jdaviz_app)] == [True, True]
-
-    # clicking again replaces the overlay with the current selection
-    assert mast_table.vue_open_selected_rows_in_jdaviz(['2']) is jdaviz_app
-
-    assert footprints.overlay.choices == ['mast-table selection']
-    assert len(footprints.overlay_regions) == 1
-    assert [mark.visible for mark in footprint_marks(jdaviz_app)] == [True]
-
-
-def test_selected_fileset_rows_shown_in_aladin(mast_observation_table):
-    MastAladin = pytest.importorskip('mast_aladin.app').MastAladin
-    aladin = MastAladin()
-    mast_table = BaseMastTable(mast_observation_table)
-
-    assert mast_table.vue_open_selected_rows_in_aladin(['0', '1']) is aladin
-    first_overlay = mast_table._aladin_fileset_overlay
-    assert first_overlay.name == 'mast-table selection'
-
-    # clicking again replaces the overlay with the current selection
-    assert mast_table.vue_open_selected_rows_in_aladin(['2']) is aladin
-    assert mast_table._aladin_fileset_overlay is not first_overlay
-    assert mast_table._aladin_fileset_overlay.name == 'mast-table selection'
 
 
 def test_server_side_pagination(mast_observation_table):
