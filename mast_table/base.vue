@@ -177,10 +177,6 @@
 
 
 <style scoped>
-:root {
-  color-scheme: light dark;
-}
-
 .base-mast-table-toolbar {
   display: flex;
   align-items: center;
