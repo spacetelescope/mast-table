@@ -308,44 +308,44 @@
 </style>
 
 <style>
+/* column menu */
 .base-mast-column-menu .v-list {
   padding: 4px 0;
 }
-
 .base-mast-column-menu .v-list-item {
   min-height: 32px;
   height: 32px;
   padding: 0 12px;
 }
-
 .base-mast-column-menu .v-list-item__content {
   padding: 0;
 }
-
 .base-mast-column-menu .v-list-item__prepend {
   padding: 0;
 }
-
 .base-mast-column-menu .v-list-item__append {
   padding: 0;
 }
 
-.base-mast-column-menu .v-list-item__spacer {
-  width: 8px;
-}
-
+/* column menu select/clear all */
 .base-mast-column-menu .select-all-item {
   min-height: 32px;
   height: 32px;
-  padding: 0 20px;
+  padding: 0 12px;
 }
-
 .base-mast-column-menu .select-all-content {
   display: flex;
   align-items: center;
-  gap: 16px;
   width: 100%;
   white-space: nowrap;
+  gap: 0;
+}
+.base-mast-column-menu .select-all-content .v-icon {
+  flex: 0 0 40px;
+  width: 40px;
+}
+.base-mast-column-menu .select-all-content > span {
+  margin-left: 0;
 }
 
 /* open-in buttons */
