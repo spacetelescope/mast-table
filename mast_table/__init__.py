@@ -1,1 +1,1 @@
-from .cross_filter_widget import MastTable, get_current_table  # noqa: F401
+from .mast_table import MastTable, get_current_table  # noqa: F401

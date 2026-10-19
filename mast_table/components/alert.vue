@@ -2,7 +2,7 @@
   <v-alert
     :text="text"
     :icon="icon"
-    class="info-box"
+    class="alert"
     density="compact"
     prominent
     icon-size="default"
@@ -10,7 +10,7 @@
 </template>
 
 <style>
-.info-box {
+.alert {
   background-color: light-dark(#b4dbe9, #013b4d);
   color: light-dark(black, white);
   margin-bottom: 16px;

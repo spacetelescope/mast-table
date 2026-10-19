@@ -15,14 +15,14 @@ import reacton.ipyvuetify as v
 
 from astropy.table import Table
 from mast_table.base import BaseMastTable, col_unique_row_index
-from mast_table.cross_filter_utils import (
+from mast_table.utils import (
     operator_map, table_filter_values, table_range,
     slide_or_select, step_size, build_select_items,
     build_select_filter_preview,
 )
 from mast_table.components.cross_filter_select import Select
 from mast_table.components.cross_filter_input import Input
-from mast_table.components.info_box import InfoBox
+from mast_table.components.alert import Alert
 
 
 # register loaded table widgets as they're initialized
@@ -1082,7 +1082,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                     )
 
                     if len(value_counts) > max_unique:
-                        InfoBox.element(
+                        Alert.element(
                             text=(
                                 f"{pending_column} has {len(value_counts)} unique values. "
                                 f"Showing the first {max_unique}."
