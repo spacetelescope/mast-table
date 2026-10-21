@@ -9,7 +9,7 @@
         }"
         @click="filter_tray_open = !filter_tray_open"
       >
-        {{ filter_tray_open ? 'Hide Conditions' : 'Show Conditions' }}
+        {{ 'Filters' }}
         <v-icon>
           {{ filter_tray_open ? 'mdi-chevron-left' : 'mdi-chevron-right' }}
         </v-icon>

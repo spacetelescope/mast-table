@@ -15,14 +15,14 @@ import reacton.ipyvuetify as v
 
 from astropy.table import Table
 from mast_table.base import BaseMastTable, col_unique_row_index
-from mast_table.cross_filter_utils import (
+from mast_table.utils import (
     operator_map, table_filter_values, table_range,
     slide_or_select, step_size, build_select_items,
     build_select_filter_preview,
 )
 from mast_table.components.cross_filter_select import Select
 from mast_table.components.cross_filter_input import Input
-from mast_table.components.info_box import InfoBox
+from mast_table.components.alert import Alert
 
 
 # register loaded table widgets as they're initialized
@@ -123,7 +123,7 @@ def SettingsMenu(
 
 
 @solara.component
-def RemoveConditionButton(
+def RemoveFilterButton(
     filter_id: str,
     on_remove=None,
 ):
@@ -426,10 +426,6 @@ def CrossFilterSlider(
     solara.use_memo(update_filter, dependencies=[filter_value, mode])
 
     with solara.VBox() as main:
-        label = f"Condition {mode} "
-        if filter_value is not None:
-            label = label + f"{filter_value}"
-
         solara.Style(
             """
             .crossfilter-slider .v-slider {
@@ -562,7 +558,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
       are shown.
     * When the user checks rows, a filter is set so that *other*
       cross-filter consumers only see the selected rows.
-    * Conditions are set and tracked in a popout window.
+    * Filters are set and tracked in a popout window.
 
     Parameters
     ----------
@@ -583,7 +579,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
     filters, set_filters = solara.use_state([])
     drawer_open, set_drawer_open = solara.use_state(False)
 
-    # get defaults for "add condition", establish pending accordingly
+    # get defaults for "add filter", establish pending accordingly
     default_column = table.colnames[0]
     default_opt = slide_or_select(table, default_column)
     if default_opt == "slider":
@@ -695,7 +691,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
             """
         )
         with solara.Row():
-            # creating popout conditions panel
+            # creating popout filters panel
             with solara.Card(
                 style={
                     "display": "block" if drawer_open else "none",
@@ -715,7 +711,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                     }
                 ):
                     solara.Markdown(
-                        "##Active conditions",
+                        "##Active filters",
                         style={
                             "margin": "0",
                             "padding": "0",
@@ -782,7 +778,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                                 classes=["reset-button"]
                             )
 
-                # creating slide/select for each active condition
+                # creating slide/select for each active filter
                 for f in filters:
                     with solara.Row(style={"width": "100%"}):
                         solara.Style(
@@ -875,7 +871,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                                 )
 
                                 with solara.Div():
-                                    RemoveConditionButton(f["id"], remove_filter)
+                                    RemoveFilterButton(f["id"], remove_filter)
 
                             with solara.Div(
                                 style={
@@ -932,10 +928,10 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                                     )
 
                 if not len(filters):
-                    solara.Markdown("No active conditions")
+                    solara.Markdown("No active filters")
 
-                # creating add condition section
-                solara.Markdown("##Add condition")
+                # creating add filter section
+                solara.Markdown("##Add filter")
 
                 column_names = table.colnames
                 column_names.sort(key=str.casefold)
@@ -1082,7 +1078,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
                     )
 
                     if len(value_counts) > max_unique:
-                        InfoBox.element(
+                        Alert.element(
                             text=(
                                 f"{pending_column} has {len(value_counts)} unique values. "
                                 f"Showing the first {max_unique}."
@@ -1092,7 +1088,7 @@ def MastTableView(table, base_mast_table, on_popout_button=None):
 
                 with solara.Row(justify="end"):
                     solara.Button(
-                        label="Apply condition",
+                        label="Apply filter",
                         icon_name="mdi-plus",
                         on_click=lambda *args: add_filter(opt),
                         disabled=fully_masked,
