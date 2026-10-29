@@ -1,6 +1,7 @@
 from mast_table.base import BaseMastTable, col_unique_row_index, serialize
 import numpy as np
 import astropy.units as u
+import pytest
 from astropy.table import Table
 
 
@@ -19,6 +20,25 @@ def test_mast_table_init(mast_observation_table):
     # the MAST observation query has a ArchiveFileID column,
     # which should be chosen as the default item_key:
     assert mast_table.item_key == 'ArchiveFileID'
+
+
+@pytest.fixture
+def aladin():
+    mast_aladin = pytest.importorskip('mast_aladin')
+    return mast_aladin.MastAladin()
+
+
+def test_show_all_footprints_in_aladin(aladin):
+    first = 'CIRCLE ICRS 10 20 0.1'
+    second = 'POLYGON ICRS 10 20 11 20 11 21'
+    table = Table({'id': range(3), 's_region': [first, second, first]})
+    mast_table = BaseMastTable(table, items_per_page=1)
+    mast_table.selected_rows = ['0']
+
+    assert mast_table.vue_open_all_footprints_in_aladin() is aladin
+    overlay = mast_table._aladin_footprints_overlay
+    assert overlay.app is aladin
+    assert overlay.data['update_info'] == [first, second]
 
 
 def test_server_side_pagination(mast_observation_table):

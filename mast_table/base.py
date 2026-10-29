@@ -104,6 +104,7 @@ class BaseMastTable(VuetifyTemplate):
     show_tooltips = Bool(True).tag(sync=True)
     menu_open = Bool(False).tag(sync=True)
     enable_load_in_app = Bool(False).tag(sync=True)
+    enable_load_footprints = Bool(False).tag(sync=True)
     mission = Unicode(allow_none=True).tag(sync=True)
     filter_tray_open = Bool(False).tag(sync=True)
     # pagination traitlets
@@ -169,10 +170,12 @@ class BaseMastTable(VuetifyTemplate):
         # initialize the table cache, so the ``table_options`` observer is safe to fire
         # if that traitlet is passed in via ``kwargs``.
         self._all_items = None
+        self._aladin_footprints_overlay = None
 
         super().__init__(**kwargs)
 
         self.table = table
+        self.enable_load_footprints = 's_region' in table.colnames
         self.table[col_unique_row_index] = np.arange(len(table))
         self.app = app
 
@@ -201,6 +204,8 @@ class BaseMastTable(VuetifyTemplate):
         self.column_descriptions = []
 
         if mission := validate.detect_mission_or_products(table):
+            if not self.mission:
+                self.mission = mission
             self.column_descriptions = validate.get_column_descriptions(mission, table)
 
             # if the user hasn't defined the ra/dec columns, use
@@ -385,6 +390,36 @@ class BaseMastTable(VuetifyTemplate):
             _download_from_mast(filename)
             mal.delayed_add_fits(filename)
 
+        return mal
+
+    def vue_open_all_footprints_in_aladin(self, *args):
+        """
+        Send every ``s_region`` footprint in the full table to mast-aladin.
+        """
+        from mast_aladin.app import gca
+        if 's_region' not in self.table.colnames:
+            raise ValueError("The table has no 's_region' column.")
+
+        regions = list(dict.fromkeys(
+            str(region).strip()
+            for region in self.table['s_region']
+            if not (np.ma.is_masked(region) or region is None) and str(region).strip()
+        ))
+        if not regions:
+            raise ValueError("The table has no non-empty 's_region' footprints.")
+
+        mal = gca()
+        previous = self._aladin_footprints_overlay
+        if previous is not None and previous.app is mal:
+            try:
+                mal.remove_overlay(previous)
+            except ValueError:
+                # the layer was already removed by the user
+                pass
+
+        self._aladin_footprints_overlay = mal.add_graphic_overlay_from_stcs(
+            regions, name='MAST footprints'
+        )
         return mal
 
     @observe('mission')

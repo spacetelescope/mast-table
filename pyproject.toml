@@ -22,6 +22,7 @@ dynamic = [
 test = [
     "pytest",
     "jdaviz @ git+https://github.com/spacetelescope/jdaviz.git@main",
+    "mast-aladin @ git+https://github.com/spacetelescope/mast-aladin.git@main",
 ]
 docs = [
     "sphinx-astropy[confv2]>=1.9.1",
