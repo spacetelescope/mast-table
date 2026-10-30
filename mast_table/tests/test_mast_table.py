@@ -1,7 +1,10 @@
-from mast_table.base import BaseMastTable, col_unique_row_index, serialize
 import numpy as np
 import astropy.units as u
 from astropy.table import Table
+import pytest
+
+from mast_table.base import BaseMastTable, col_unique_row_index, serialize
+from mast_table import MastTable
 
 
 def test_mast_table_init(mast_observation_table):
@@ -109,3 +112,38 @@ def test_column_format_propagates_to_widget(mast_observation_table):
         # NaNs become '' otherwise we expect a formatted string with 2 decimals
         assert value == '' or (isinstance(value, str) and value.count('.') == 1
                                and len(value.split('.')[1]) == 2)
+
+
+def test_show_invalid_locs(mast_observation_table):
+    """
+    Test that the show method correctly raises errors for invalid locs.
+    """
+    mast_table = MastTable(mast_observation_table)
+
+    # check invalid loc type
+    with pytest.raises(TypeError, match="Invalid loc type provided. Must be a string."):
+        mast_table.show(loc=1234)
+
+    # check invalid sidecar anchor
+    with pytest.raises(ValueError, match="Invalid anchor provided. Must be one of"):
+        mast_table.show(loc="sidecar:invalid")
+
+    # check invalid sidecar ref
+    with pytest.raises(ValueError, match="Invalid ref provided. Must be a `Sidecar`"):
+        mast_table.show(loc="sidecar", ref="invalid_ref")
+    with pytest.raises(ValueError, match="Invalid ref provided. Must be a `Sidecar`"):
+        mast_table.show(loc="sidecar", ref=mast_table)
+
+    # check invalid popout anchor
+    with pytest.raises(
+        ValueError,
+        match="Invalid anchor provided. Must be 'window' or 'tab'"
+    ):
+        mast_table.show(loc="popout:invalid")
+
+    # check invalid loc str
+    with pytest.raises(
+        ValueError,
+        match="Invalid loc provided. Must be 'inline', 'sidecar', or 'popout'."
+    ):
+        mast_table.show(loc="invalid")

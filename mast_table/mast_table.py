@@ -1173,6 +1173,7 @@ class MastTable:
             item_key=col_unique_row_index,
             **kwargs,
         )
+        self.sidecar = kwargs.get("sidecar", None)
         self.popout_button = None
 
     def __getattr__(self, name):
@@ -1235,9 +1236,10 @@ class MastTable:
         title : str, optional (default "MastTable")
             The title of the sidecar tab, only applicable to a "sidecar" display.
 
-        ref: Sidecar, optional (default None)
-            An existing reference sidecar. Opens the new sidecar display with its anchor defined
-            relative to the ref sidecar. Only applicable to a "sidecar" display.
+        ref: Sidecar | app, optional (default None)
+            An existing reference sidecar or app with `.sidecar` attribute. Opens the new sidecar
+            display with its anchor defined relative to the ref sidecar. Only applicable to a
+            "sidecar" display.
 
         """
         valid_anchors = [
@@ -1246,7 +1248,7 @@ class MastTable:
         ]
 
         if type(loc) is not str:
-            raise ValueError("Invalid loc provided. Must be a string.")
+            raise TypeError("Invalid loc type provided. Must be a string.")
 
         if loc == "inline":
             self._ipython_display_()
@@ -1259,9 +1261,25 @@ class MastTable:
                     "``jupyterlab-sidecar``. Valid anchors are: "
                     f"{valid_anchors[:-1]}")
 
+            if ref and not isinstance(ref, Sidecar):
+                try:
+                    ref = ref.sidecar
+                except AttributeError:
+                    raise ValueError(
+                        "Invalid ref provided. Must be a `Sidecar` instance or an "
+                        "app with `.sidecar` attribute."
+                    )
+
+                if ref is None:
+                    raise ValueError(
+                        "Invalid ref provided. Must be a `Sidecar` instance or an "
+                        "app with `.sidecar` attribute."
+                    )
+
             sc = Sidecar(title=title, anchor=anchor, ref=ref)
             with sc:
                 self._ipython_display_()
+            self.sidecar = sc
 
         elif loc.startswith("popout"):
             if self.popout_button is None:
@@ -1280,6 +1298,8 @@ class MastTable:
                 raise ValueError(
                     "Invalid anchor provided. Must be 'window' or 'tab'."
                 )
+        else:
+            raise ValueError("Invalid loc provided. Must be 'inline', 'sidecar', or 'popout'.")
 
 
 def get_current_table():
