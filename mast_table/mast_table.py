@@ -5,6 +5,7 @@ import warnings
 import functools
 import uuid
 
+import numpy as np
 from IPython.display import display
 from ipypopout import PopoutButton
 from sidecar import Sidecar
@@ -522,10 +523,10 @@ def SelectableTable(
 
     base_mast_table.filter_tray_open = drawer_open
 
+    # drop selections hidden by the active filters (not just those off the current page)
+    visible_keys = set(np.asarray(table[col_unique_row_index]).astype(str).tolist())
     base_mast_table.selected_rows = [
-        item[col_unique_row_index]
-        for item in base_mast_table.items
-        if item[col_unique_row_index] in selected
+        key for key in selected if key in visible_keys
     ]
 
     def observe_widget(base_mast_table, on_change, handle_input):
@@ -1192,6 +1193,20 @@ class MastTable:
     @property
     def selected_rows_table(self):
         return self.table[[int(value) for value in self.widget.selected_rows]]
+
+    @property
+    def selected_mask(self):
+        """Boolean array over the backing table; `True` for selected rows."""
+        return self.widget.selected_mask
+
+    @selected_mask.setter
+    def selected_mask(self, value):
+        self.widget.selected_mask = value
+
+    @property
+    def filter_mask(self):
+        """Boolean array over the backing table; `True` for rows shown after filtering."""
+        return self.widget.filter_mask
 
     @property
     def items(self):

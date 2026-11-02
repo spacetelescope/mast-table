@@ -2,7 +2,10 @@ import os
 import re
 import warnings
 
-from traitlets import List, Unicode, Bool, Int, Dict, observe
+from traitlets import (
+    List, Unicode, Bool, Int, Dict, Any, TraitError, observe,
+    validate as validate_trait,  # Avoid name conflict with mast_table.validate
+)
 from ipyvuetify import VuetifyTemplate
 
 import numpy as np
@@ -101,6 +104,17 @@ class BaseMastTable(VuetifyTemplate):
     show_if_empty = Bool(True).tag(sync=True)
     show_rowselect = Bool(True).tag(sync=True)
     selected_rows = List().tag(sync=True)
+
+    # Boolean numpy array with same number of rows as the backing table.
+    # It reflects the same info as selected_rows in mask form.
+    # It is not synced with the Javascript where selected_rows is the root truth.
+    selected_mask = Any()
+
+    # Boolean numpy array with same number of rows as the backing table.
+    # It represents which rows are still displayed after filters are applied.
+    # It is read-only and not synced with the Javascript.
+    filter_mask = Any(read_only=True)
+
     show_tooltips = Bool(True).tag(sync=True)
     menu_open = Bool(False).tag(sync=True)
     enable_load_in_app = Bool(False).tag(sync=True)
@@ -182,12 +196,18 @@ class BaseMastTable(VuetifyTemplate):
 
         self._all_items = self.table
         self.server_items_length = len(self._all_items)
+
+        # Set filter mask to all True (no rows hidden by filters)
+        self.set_trait('filter_mask', np.ones(len(self.table), dtype=bool))
+
         self._push_current_page()
 
         columns = self.table.colnames
 
         if not self.item_key:
             self._set_item_key(columns, unique_column)
+
+        self._sync_selected_mask()
 
         # headers_avail excludes the unique row index column, and headers_visible
         # defaults to exclude the `s_region` column (can be undone in the UI)
@@ -247,7 +267,22 @@ class BaseMastTable(VuetifyTemplate):
         """Update the table data and refresh the current page."""
         self._all_items = table
         self.server_items_length = len(self._all_items)
+        self._update_filter_mask(table)
         self._push_current_page()
+
+    def _update_filter_mask(self, displayed_items):
+        """
+        Recompute ``filter_mask`` from the rows currently displayed.
+        It is read-only, so it is updated via ``set_trait``,
+        and only when the mask actually changes.
+        """
+        mask = np.isin(
+            np.asarray(self.table[col_unique_row_index]),
+            np.asarray(displayed_items[col_unique_row_index]),
+        )
+        # Only notify if the mask actually changed.
+        if not np.array_equal(self.filter_mask, mask):
+            self.set_trait('filter_mask', mask)
 
     def _push_current_page(self):
         """Push only the current page of the table to ``items``."""
@@ -340,8 +375,56 @@ class BaseMastTable(VuetifyTemplate):
                 return entry["description"]
         return None
 
+    def _item_keys(self):
+        """``item_key`` column as strings, matching ``selected_rows`` entries."""
+        return np.asarray(self.table[self.item_key]).astype(str)
+
+    def _mask_from_selected_rows(self):
+        return np.isin(self._item_keys(), list(self.selected_rows))
+
+    def _sync_selected_mask(self):
+        if self.table is None or not self.item_key:
+            return
+        mask = self._mask_from_selected_rows()
+        if self.selected_mask is None or not np.array_equal(self.selected_mask, mask):
+            self.selected_mask = mask
+
+    @validate_trait('selected_mask')
+    def _validate_selected_mask(self, proposal):
+        """
+        Coerce a proposed ``selected_mask`` to a boolean numpy array and
+        check that its length matches the number of rows in ``table``.
+
+        This is done in a traitlets validator rather than in the observer
+        because validators run *before* the value is stored and before any
+        observers fire. That protects observer code from potential junk.
+        """
+        mask = proposal['value']
+        if not hasattr(mask, '__len__'):
+            mask = list(mask)
+        mask = np.asarray(mask, dtype=bool)
+        if self.table is not None and mask.shape != (len(self.table),):
+            raise TraitError(
+                f"selected_mask must have shape ({len(self.table)},), got {mask.shape}"
+            )
+        return mask
+
+    @observe('selected_mask')
+    def _on_selected_mask(self, change):
+        """
+        Propagate a change to ``selected_mask`` into ``selected_rows`` so the
+        UI selection matches. Does nothing if they are already in sync.
+        """
+        mask = change['new']
+        if mask is None or self.table is None or not self.item_key:
+            return
+        if np.array_equal(mask, self._mask_from_selected_rows()):
+            return
+        self.selected_rows = self._item_keys()[mask].tolist()
+
     @observe('selected_rows')
     def _on_row_selection(self, msg={}):
+        self._sync_selected_mask()
         for func in self.row_select_callbacks:
             func(msg)
 
