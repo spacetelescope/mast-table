@@ -131,7 +131,10 @@ def test_show_invalid_locs(mast_observation_table):
     # check invalid sidecar ref
     with pytest.raises(ValueError, match="Invalid ref provided. Must be a `Sidecar`"):
         mast_table.show(loc="sidecar", ref="invalid_ref")
-    with pytest.raises(ValueError, match="Invalid ref provided. Must be a `Sidecar`"):
+    with pytest.raises(ValueError, match="Invalid ref provided. App must have an"):
+        mast_table.show(loc="sidecar", ref=mast_table)
+    mast_table.sidecar = "fake"
+    with pytest.raises(ValueError, match="Invalid ref provided. App must have an"):
         mast_table.show(loc="sidecar", ref=mast_table)
 
     # check invalid popout anchor
