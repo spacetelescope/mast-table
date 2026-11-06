@@ -32,7 +32,14 @@ intersphinx_mapping = {
     'jdaviz': ('https://jdaviz.readthedocs.io/en/latest/', None),
     'python': ('https://docs.python.org/3/',
                (None, 'http://data.astropy.org/intersphinx/python3.inv')),
-    'astropy': ('https://docs.astropy.org/en/stable/', None)
+    'astropy': ('https://docs.astropy.org/en/stable/', None),
+    'astroquery': ('https://astroquery.readthedocs.io/en/stable/', None),
+    'mast-aladin': ('https://mast-aladin.readthedocs.io/en/latest/', None),
+    'ipyvuetify': ('https://ipyvuetify.readthedocs.io/en/latest', None),
+    # 'solara': ('https://solara.dev/documentation/api', None),
+    # 'reacton': ('https://reacton.solara.dev/en/latest/', None),
+    'traitlets': ('https://traitlets.readthedocs.io/en/stable/', None),
+
 }
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -46,6 +53,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx_automodapi.automodapi',
+    'sphinx_automodapi.smart_resolver',
     'sphinx.ext.mathjax',
     'sphinx_design'
 ]
@@ -146,13 +154,16 @@ pygments_style = 'sphinx'
 # variables set in the global configuration. The variables set in the
 # global configuration are listed below, commented out.
 
-# html_css_files = ["mast-table.css"]
 html_copy_source = False
-
+html_static_path = ['assets']
+html_css_files = ['mast-table.css']
 html_theme_options.update(  # noqa: F405
     {
         "github_url": "https://github.com/spacetelescope/mast-table",
         "use_edit_page_button": True,
+        "logo": {
+            "text": '<span id="mast">mast</span>-<span id="app">table</span>'
+        }
     }
 )
 
@@ -171,19 +182,19 @@ html_context = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-# html_title = None
+html_title = 'mast-table'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-# html_short_title = None
+html_short_title = 'mast-table'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = 'logos/<mast-table.svg'
+html_logo = 'assets/stsci_symbol_pantone279.svg'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-# html_favicon = 'logos/<mast-table>.ico'
+html_favicon = 'assets/stsci_symbol_pantone279.ico'
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

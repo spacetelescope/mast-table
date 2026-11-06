@@ -147,9 +147,9 @@ class BaseMastTable(VuetifyTemplate):
         unique_column : str (optional, default is `None`)
             A column which contains unique values in each row.
 
-            If no `unique_column` is given, ``MastTable`` will look for a
+            If no ``unique_column`` is given, ``MastTable`` will look for a
             column known to have unique values for each row in common MAST
-            observation queries. If no known `unique_column` is found,
+            observation queries. If no known ``unique_column`` is found,
             search through the table to find a column with unique rows.
 
             For tables with many rows, unique column searches are inefficient
@@ -163,7 +163,7 @@ class BaseMastTable(VuetifyTemplate):
 
         **kwargs
             Remaining keyword arguments are passed to
-            ``ipyvuetify.VuetifyTemplate``.
+            `ipyvuetify.VuetifyTemplate`.
         """
 
         # initialize the table cache, so the ``table_options`` observer is safe to fire
