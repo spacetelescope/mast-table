@@ -81,6 +81,17 @@
         </v-card>
       </v-menu>
 
+      <v-tooltip v-if="enable_load_footprints" location="top">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            class="open-in footprint-action elevation-1"
+            @click="open_all_footprints_in_aladin()"
+            ><v-icon>mdi-vector-polygon</v-icon>Show all footprints in Aladin</v-btn>
+        </template>
+        <div style="text-align: center;">Send every s_region footprint<br />in the table to mast-aladin</div>
+      </v-tooltip>
+
       <div v-if="mission == 'list_products' && enable_load_in_app">
         <v-tooltip location="top">
         <template v-slot:activator="{ props }">
@@ -353,6 +364,10 @@
   background-color: light-dark(#b4dbe8, #00617e);
   margin-left: 0.5em;
   width: 7em;
+}
+.open-in.footprint-action {
+  width: auto;
+  white-space: nowrap;
 }
 .open-in:not(:disabled):hover {
   background-color: light-dark(#b4dbe8, #00617e);
