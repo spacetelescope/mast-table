@@ -1,3 +1,7 @@
+.. |rrn| raw:: html
+
+  <a href="https://roman.science.stsci.edu" target="_blank">Roman Research Nexus</a>
+
 mast-table
 ==========
 
@@ -12,8 +16,7 @@ The source code is available on `GitHub <https://github.com/spacetelescope/mast-
 Key Features
 ************
 
-* **Runs on the** `Roman Research Nexus <https://roman.science.stsci.edu/hub/login?next=%2Fhub%2F>`_,
-  or on your local machine in a Jupyter notebook
+* **Runs on the** |rrn| or on your local machine in a Jupyter notebook
 * **Browse MAST query results** for observations or sources in catalogs with a user interface 
   with a similar look and feel to the MAST `Mission Search <https://mast.stsci.edu/search>`_ query
   result page
@@ -31,6 +34,7 @@ Contents
 
    installation
    getting_started
+   mast_aladin
    api
 
 

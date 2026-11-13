@@ -28,7 +28,8 @@ docs = [
     "sphinx-automodapi",
     "sphinx-toml",
     "sphinx-astropy[confv2]>=1.9.1",
-    "sphinx_design"
+    "sphinx_design",
+    "sphinx-copybutton",
 ]
 
 [project.readme]

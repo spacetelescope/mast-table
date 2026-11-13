@@ -43,3 +43,8 @@ img.outlined {
     tip admonition header background. */
     border: 3px solid #d6ece1
 }
+
+button.copybtn {
+   /* Make sphinx-copybutton always visible (not just on hover) */
+   opacity: 1;
+}

@@ -1,3 +1,5 @@
+.. _getting_started:
+
 .. |jwst_search| raw:: html
 
    <a href="https://mast.stsci.edu/search/ui/#/jwst" target="_blank">JWST Search</a>
@@ -12,7 +14,7 @@ Getting started
 ===============
 
 In this example, we'll query MAST for JWST observations of a stellar merger
-event and explore the data using `mast-table`.
+event and explore the data using ``mast-table``.
 
 Query MAST
 ----------

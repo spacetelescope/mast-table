@@ -1,5 +1,5 @@
 {# _templates/globaltoc.html #}
 <div class="custom-globaltoc">
   <h4>{{ _('Contents') }}</h4>
-  {{ toctree(maxdepth=theme_globaltoc_maxdepth|tobool, collapse=True, includehidden=True) }}
+  {{ toctree(maxdepth=theme_globaltoc_maxdepth|tobool, collapse=False, includehidden=True) }}
 </div>

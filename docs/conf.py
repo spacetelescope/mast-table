@@ -55,7 +55,8 @@ extensions = [
     'sphinx_automodapi.automodapi',
     'sphinx_automodapi.smart_resolver',
     'sphinx.ext.mathjax',
-    'sphinx_design'
+    'sphinx_design',
+    'sphinx_copybutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
