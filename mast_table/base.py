@@ -201,6 +201,7 @@ class BaseMastTable(VuetifyTemplate):
         self.column_descriptions = []
 
         if mission := validate.detect_mission_or_products(table):
+            self.mission = mission
             self.column_descriptions = validate.get_column_descriptions(mission, table)
 
             # if the user hasn't defined the ra/dec columns, use
