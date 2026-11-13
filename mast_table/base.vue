@@ -91,7 +91,7 @@
             @click="open_selected_rows_in_aladin"
             ><v-icon>mdi-open-in-app</v-icon>aladin</v-btn>
           </template>
-          <div style="text-align: center;">Download, open selection<br />in mast-aladin-lite</div>
+          <div style="text-align: center;">Download, open product in mast-aladin.<br /> If not visible, call:<br />import mast_aladin; gca().show()</div>
         </v-tooltip>
 
         <v-tooltip location="top">
@@ -103,7 +103,7 @@
             @click="open_selected_rows_in_jdaviz"
             ><v-icon>mdi-open-in-app</v-icon>jdaviz</v-btn>
           </template>
-          <div style="text-align: center;">Download, open<br />selection in jdaviz</div>
+          <div style="text-align: center;">Download, open product in jdaviz.<br />If not visible, call:<br />jdaviz.show()</div>
         </v-tooltip>
       </div>
     </div>
